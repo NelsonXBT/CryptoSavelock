@@ -1,0 +1,42 @@
+# Node modules
+node_modules/
+.pnp/
+.pnp.js
+
+# Build output
+dist/
+build/
+out/
+.next/
+.cache/
+.temp/
+
+# IDE and system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment files
+.env
+.env.*
+
+# Hardhat/Foundry/Truffle
+artifacts/
+cache/
+typechain/
+types/
+deployments/
+broadcast/
+
+# Static assets cache
+public/cache/
+
+# Git & deployment archives
+*.tgz
+*.zip
+*.tar.gz
