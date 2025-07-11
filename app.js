@@ -62,15 +62,13 @@ function startCountdown() {
   }
 
   const interval = setInterval(() => {
-    const now = Date.now();  // milliseconds
+    const now = Date.now();
     const diff = unlockTimestamp * 1000 - now;
 
     if (diff <= 0) {
       timerEl.textContent = "Unlocked!";
       clearInterval(interval);
-      // Optional: disable inputs
-      document.getElementById("depositBtn").disabled = true;
-      depositAmount.disabled = true;
+      // ✅ Do NOT disable inputs — allow user to trigger popup
     } else {
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
