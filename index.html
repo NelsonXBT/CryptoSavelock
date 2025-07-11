@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Crypto SaveLock</title>
   <link rel="stylesheet" href="styles.css" />
+  
+  <!-- ✅ Load Ethers.js (must come before app.js) -->
+  <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js" type="application/javascript"></script>
+
+  <!-- ✅ Defer script to load after DOM is ready -->
+  <script defer src="app.js"></script>
 </head>
 <body>
   <div id="homepage" class="container active">
@@ -45,8 +51,12 @@
     </table>
   </div>
 
-  <!-- ✅ Add Ethers.js CDN before your app.js -->
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.8.1/dist/ethers.umd.min.js"></script>
-  <script src="app.js"></script>
+  <!-- ✅ Attach the connect button listener safely -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const connectBtn = document.getElementById('connectBtn');
+      connectBtn.addEventListener('click', initApp);
+    });
+  </script>
 </body>
 </html>
