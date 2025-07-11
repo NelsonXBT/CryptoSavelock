@@ -12,7 +12,7 @@ const contractAddress = "0xE7D0F892f315B4E3d25cC91936Edb29492754Db5";
 
 let provider, signer, contract, userAddress, unlockTimestamp;
 
-// ✅ Main function to initialize dApp
+// ✅ Initialize dApp
 async function initApp() {
   try {
     if (typeof window.ethereum === 'undefined') {
@@ -22,7 +22,6 @@ async function initApp() {
 
     provider = new ethers.BrowserProvider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
-
     signer = await provider.getSigner();
     userAddress = await signer.getAddress();
 
@@ -44,7 +43,7 @@ async function initApp() {
   }
 }
 
-// ⏳ Countdown timer
+// ⏳ Countdown timer handler
 function startCountdown() {
   if (!unlockTimestamp) {
     timerEl.textContent = "Invalid unlock time.";
@@ -58,7 +57,7 @@ function startCountdown() {
     if (diff <= 0) {
       timerEl.textContent = "Unlocked!";
       clearInterval(interval);
-      document.getElementById('depositAmount').disabled = true;
+      depositAmount.disabled = true;
       document.getElementById('depositBtn').disabled = true;
       claimWrapper.style.display = 'block';
     } else {
@@ -71,19 +70,21 @@ function startCountdown() {
   }, 1000);
 }
 
-// 🧾 Load user deposits and populate table
+// 🧾 Load user deposits and update UI
 async function loadUserData() {
   const deposits = await contract.getDeposits(userAddress);
   const total = await contract.getTotalDeposited(userAddress);
   totalDepositedEl.textContent = `${ethers.formatEther(total)} ETH`;
 
   historyTableBody.innerHTML = '';
+
   deposits.forEach((d, index) => {
     const row = document.createElement('tr');
 
+    const isUnlocked = Date.now() / 1000 >= unlockTimestamp;
     const status = d.claimed
       ? '✅ Claimed'
-      : (Date.now() / 1000 >= unlockTimestamp ? '🔓 Claimable' : '🔒 Locked');
+      : (isUnlocked ? '🔓 Claimable' : '🔒 Locked');
 
     row.innerHTML = `
       <td>${ethers.formatEther(d.amount)} ETH</td>
@@ -95,7 +96,7 @@ async function loadUserData() {
   });
 }
 
-// 💰 Handle deposit
+// 💰 Handle deposit submission
 depositForm.addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -118,9 +119,10 @@ depositForm.addEventListener('submit', async (e) => {
   }
 });
 
-// 🚀 Claim all
+// 🚀 Claim all unclaimed deposits
 claimWrapper.querySelector('button').addEventListener('click', async () => {
   const deposits = await contract.getDeposits(userAddress);
+
   for (let i = 0; i < deposits.length; i++) {
     if (!deposits[i].claimed) {
       try {
@@ -131,11 +133,14 @@ claimWrapper.querySelector('button').addEventListener('click', async () => {
       }
     }
   }
+
   await loadUserData();
 });
 
+// 👟 Load connect button handler
 window.onload = () => {
   connectBtn.addEventListener('click', initApp);
 };
 
+// 🌐 Expose initApp globally if needed elsewhere
 window.initApp = initApp;

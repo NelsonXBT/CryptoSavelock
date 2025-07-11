@@ -9,6 +9,7 @@
   <script defer src="app.js"></script>
 </head>
 <body>
+  <!-- Homepage / Landing -->
   <div id="homepage" class="container active">
     <h1>Welcome to Crypto SaveLock</h1>
     <p>
@@ -19,8 +20,10 @@
     <button id="connectBtn">Connect Wallet</button>
   </div>
 
+  <!-- Dashboard after wallet connection -->
   <div id="dashboard" class="container">
     <div class="deposit-container">
+      <!-- Deposit Form -->
       <div>
         <h3>Deposit your savings</h3>
         <form id="depositForm">
@@ -29,17 +32,24 @@
         </form>
       </div>
 
-      <div id="totalDeposited">0 ETH</div>
+      <!-- Total Balance Box -->
+      <div class="total-balance-box">
+        <span class="label">Total Balance:</span>
+        <span id="totalDeposited">0 ETH</span>
+      </div>
     </div>
 
+    <!-- Countdown Timer -->
     <div id="countdown">
       Unlocks in: <span id="timer">Loading...</span>
     </div>
 
+    <!-- Claim Button -->
     <div id="globalClaimWrapper">
       <button id="globalClaimBtn">Claim Your Savings</button>
     </div>
 
+    <!-- Deposit History Table -->
     <h3>Deposit History</h3>
     <table id="historyTable">
       <thead>
@@ -53,6 +63,7 @@
     </table>
   </div>
 
+  <!-- Init App Script -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const connectBtn = document.getElementById('connectBtn');
