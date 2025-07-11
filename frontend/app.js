@@ -1,22 +1,20 @@
-// ✅ Load ABI and Initialize App with better debug
 async function initApp() {
   try {
-    console.log("🔄 Fetching ABI from: abi/contractABI.json");
-    const response = await fetch('abi/contractABI.json'); // ← no './'
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch ABI: ${response.statusText}`);
+    if (typeof window.ethereum === 'undefined') {
+      alert("No wallet detected. Please install MetaMask.");
+      return;
     }
 
-    const abi = await response.json();
-    console.log("✅ ABI loaded:", abi);
+    console.log("🟢 Wallet detected. Connecting...");
 
     provider = new ethers.BrowserProvider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
+    
     signer = await provider.getSigner();
     userAddress = await signer.getAddress();
 
-    console.log("✅ Wallet connected:", userAddress);
+    const response = await fetch('./abi/contractABI.json');
+    const abi = await response.json();
 
     contract = new ethers.Contract(contractAddress, abi, signer);
 
@@ -24,12 +22,13 @@ async function initApp() {
     dashboard.classList.add('active');
 
     unlockTimestamp = await contract.getUnlockTime();
-    console.log("🔓 Unlock timestamp:", unlockTimestamp);
-
     startCountdown();
     await loadUserData();
+
+    console.log("✅ Wallet connected:", userAddress);
+
   } catch (err) {
-    console.error("🚨 Error initializing dApp:", err);
+    console.error("❌ Failed to initialize dApp:", err);
     alert("Failed to initialize dApp. Check console for details.");
   }
 }
