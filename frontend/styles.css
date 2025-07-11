@@ -74,4 +74,17 @@ table th, table td {
   padding: 8px 12px;
   text-align: center;
 }
+/* Remove borders from the table */
+#historyTable,
+#historyTable th,
+#historyTable td {
+  border: none;
+  border-collapse: collapse;
+}
+
+/* Optional: add some spacing */
+#historyTable td, #historyTable th {
+  padding: 10px;
+  text-align: center;
+}
 
