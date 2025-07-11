@@ -35,9 +35,16 @@
     </div>
 
     <form id="depositForm">
-      <input type="number" id="depositAmount" placeholder="Amount in ETH" min="0.01" step="0.01" required />
-      <button type="submit" id="depositBtn">Deposit</button>
+      <div id="depositArea">
+        <input type="number" id="depositAmount" placeholder="Amount in ETH" min="0.01" step="0.01" required />
+        <button type="submit" id="depositBtn">Deposit</button>
+      </div>
     </form>
+
+<!-- Hidden by default: appears after unlock -->
+<div id="globalClaimWrapper" style="display: none; text-align: center;">
+  <button id="globalClaimBtn">Claim Your Savings</button>
+</div>
 
     <h3>Deposit History</h3>
     <table id="historyTable">

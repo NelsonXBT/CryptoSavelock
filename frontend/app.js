@@ -68,7 +68,12 @@ function startCountdown() {
     if (diff <= 0) {
       timerEl.textContent = "Unlocked!";
       clearInterval(interval);
-      // ✅ Do NOT disable inputs — allow user to trigger popup
+
+      // 🔁 Hide deposit UI
+      document.getElementById('depositArea').style.display = 'none';
+
+      // ✅ Show claim button
+      document.getElementById('globalClaimWrapper').style.display = 'block';
     } else {
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
@@ -78,6 +83,7 @@ function startCountdown() {
     }
   }, 1000);
 }
+
 
 // 🧾 Load user deposits and populate table
 async function loadUserData() {
@@ -132,6 +138,24 @@ depositForm.addEventListener('submit', async (e) => {
     console.error("❌ Deposit failed:", err);
     alert("Deposit failed. See console for details.");
   }
+});
+
+// 🚀 Claim all unclaimed deposits
+document.getElementById('globalClaimBtn').addEventListener('click', async () => {
+  const deposits = await contract.getDeposits(userAddress);
+
+  for (let i = 0; i < deposits.length; i++) {
+    if (!deposits[i].claimed) {
+      try {
+        const tx = await contract.claim(i);
+        await tx.wait();
+      } catch (err) {
+        console.error(`❌ Failed to claim index ${i}:`, err);
+      }
+    }
+  }
+
+  await loadUserData();
 });
 
 // ✅ Claim handler
