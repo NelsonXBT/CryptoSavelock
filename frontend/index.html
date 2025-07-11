@@ -5,12 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Crypto SaveLock</title>
   <link rel="stylesheet" href="styles.css" />
-  
-  <!-- ✅ Load Ethers.js (must come before app.js) -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.7.0/dist/ethers.umd.min.js"></script>
-
-
-  <!-- ✅ Defer script to load after DOM is ready -->
   <script defer src="app.js"></script>
 </head>
 <body>
@@ -25,26 +20,23 @@
   </div>
 
   <div id="dashboard" class="container">
-    <h1>Dashboard</h1>
-    <p>Your wallet is connected.</p>
+    <div id="totalDeposited">0 ETH</div>
 
-    <h2>Total Deposited: <span id="totalDeposited">0 ETH</span></h2>
+    <div>
+      <h3>Deposit your savings</h3>
+      <form id="depositForm">
+        <input type="number" id="depositAmount" placeholder="Ether deposit amount" min="0.01" step="0.01" required />
+        <button type="submit" id="depositBtn">Deposit</button>
+      </form>
+    </div>
 
     <div id="countdown">
       Unlocks in: <span id="timer">Loading...</span>
     </div>
 
-    <form id="depositForm">
-      <div id="depositArea">
-        <input type="number" id="depositAmount" placeholder="Amount in ETH" min="0.01" step="0.01" required />
-        <button type="submit" id="depositBtn">Deposit</button>
-      </div>
-    </form>
-
-<!-- Hidden by default: appears after unlock -->
-<div id="globalClaimWrapper" style="display: none; text-align: center;">
-  <button id="globalClaimBtn">Claim Your Savings</button>
-</div>
+    <div id="globalClaimWrapper">
+      <button id="globalClaimBtn">Claim Your Savings</button>
+    </div>
 
     <h3>Deposit History</h3>
     <table id="historyTable">
@@ -59,7 +51,6 @@
     </table>
   </div>
 
-  <!-- ✅ Attach the connect button listener safely -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const connectBtn = document.getElementById('connectBtn');
