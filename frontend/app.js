@@ -43,7 +43,7 @@ async function initApp() {
     dashboard.classList.add('active');
 
     unlockTimestamp = await contract.getUnlockTime();
-    console.log("🔓 Unlock timestamp:", unlockTimestamp);
+    console.log("🔓 Unlock timestamp:", Number(unlockTimestamp));
 
     startCountdown();
     await loadUserData();
@@ -57,7 +57,7 @@ async function initApp() {
 function startCountdown() {
   const interval = setInterval(() => {
     const now = Date.now();
-    const diff = unlockTimestamp * 1000 - now;
+    const diff = Number(unlockTimestamp) * 1000 - now;
 
     if (diff <= 0) {
       timerEl.textContent = "Unlocked!";
@@ -82,7 +82,7 @@ async function loadUserData() {
   deposits.forEach((d, index) => {
     const row = document.createElement('tr');
 
-    const claimable = !d.claimed && (Date.now() / 1000 >= unlockTimestamp);
+    const claimable = !d.claimed && (Date.now() / 1000 >= Number(unlockTimestamp));
     const btn = claimable
       ? `<button onclick="claimDeposit(${index})">Claim</button>`
       : d.claimed
@@ -91,7 +91,7 @@ async function loadUserData() {
 
     row.innerHTML = `
       <td>${ethers.formatEther(d.amount)} ETH</td>
-      <td>${new Date(d.timestamp * 1000).toLocaleString()}</td>
+      <td>${new Date(Number(d.timestamp) * 1000).toLocaleString()}</td>
       <td>${btn}</td>
     `;
     historyTableBody.appendChild(row);
@@ -120,10 +120,10 @@ window.claimDeposit = async (index) => {
   await loadUserData();
 };
 
-// ✅ Wait for DOM then bind connect button
+// 🎯 Connect button
 window.onload = () => {
   connectBtn.addEventListener('click', initApp);
 };
 
-// 🔁 Make it available in console if needed
+// 🔁 Make globally accessible
 window.initApp = initApp;
