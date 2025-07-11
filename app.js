@@ -57,8 +57,20 @@ function startCountdown() {
     if (diff <= 0) {
       timerEl.textContent = "Unlocked!";
       clearInterval(interval);
-      depositAmount.disabled = true;
-      document.getElementById('depositBtn').disabled = true;
+
+      // Hide deposit input and button
+      document.getElementById('depositForm').style.display = 'none';
+
+      // Update heading and message
+      const heading = document.getElementById('depositHeading');
+      const afterText = document.getElementById('afterUnlockText');
+      const inlineClaim = document.getElementById('inlineClaimWrapper');
+
+      if (heading) heading.textContent = 'Saving Period has Ended';
+      if (afterText) afterText.style.display = 'block';
+      if (inlineClaim) inlineClaim.style.display = 'block';
+
+      // Also show global claim button if needed
       claimWrapper.style.display = 'block';
     } else {
       const d = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -119,7 +131,7 @@ depositForm.addEventListener('submit', async (e) => {
   }
 });
 
-// 🚀 Claim all unclaimed deposits
+// 🚀 Claim all unclaimed deposits (global claim button)
 claimWrapper.querySelector('button').addEventListener('click', async () => {
   const deposits = await contract.getDeposits(userAddress);
 
@@ -136,6 +148,25 @@ claimWrapper.querySelector('button').addEventListener('click', async () => {
 
   await loadUserData();
 });
+
+// 🚀 Inline claim button (replaces deposit section after unlock)
+const inlineClaimBtn = document.getElementById('inlineClaimBtn');
+if (inlineClaimBtn) {
+  inlineClaimBtn.addEventListener('click', async () => {
+    const deposits = await contract.getDeposits(userAddress);
+    for (let i = 0; i < deposits.length; i++) {
+      if (!deposits[i].claimed) {
+        try {
+          const tx = await contract.claim(i);
+          await tx.wait();
+        } catch (err) {
+          console.error(`Claim failed at index ${i}:`, err);
+        }
+      }
+    }
+    await loadUserData();
+  });
+}
 
 // 👟 Load connect button handler
 window.onload = () => {
