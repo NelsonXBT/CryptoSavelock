@@ -56,7 +56,7 @@ button:hover {
   align-items: center;
   margin: 20px 0;
   width: 100%;
-  max-width: 400px;
+  max-width: 380px;
 }
 
 #depositForm label {
@@ -110,7 +110,7 @@ input[type="number"]::placeholder {
   display: none;
 }
 
-/* Mobile View (default) */
+/* Deposit + Balance Container (default mobile) */
 .deposit-container {
   display: flex;
   flex-direction: column;
@@ -119,13 +119,14 @@ input[type="number"]::placeholder {
   width: 100%;
 }
 
-/* Total Balance Box Upgrade */
+/* Total Balance Box */
 .total-balance-box {
   background-color: #d4a055; /* Gold */
   color: #000;
   border-radius: 16px;
   padding: 30px 40px;
-  min-width: 320px;
+  width: 100%;
+  max-width: 380px;
   min-height: 120px;
   display: flex;
   flex-direction: column;
@@ -133,7 +134,7 @@ input[type="number"]::placeholder {
   align-items: center;
   font-weight: bold;
   font-size: 1.8rem;
-  box-shadow: 0 0 0 2px #fff; /* Optional white outline */
+  border: 2px solid #d4a055; /* No white outline */
   text-align: center;
 }
 
@@ -160,16 +161,24 @@ input[type="number"]::placeholder {
     justify-content: center;
     align-items: flex-start;
     gap: 80px;
+    text-align: left;
+  }
+
+  .deposit-container > .deposit-section {
+    order: 1;
+  }
+
+  .deposit-container > .total-balance-box {
+    order: 2;
+    align-self: flex-start;
   }
 
   #depositForm {
-    max-width: 300px;
+    align-items: flex-start;
+    margin: 0;
   }
 
   .total-balance-box {
-    min-width: 350px;
-    min-height: 140px;
     margin-top: 0;
-    align-self: center;
   }
 }
