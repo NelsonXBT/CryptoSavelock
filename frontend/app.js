@@ -55,9 +55,16 @@ async function initApp() {
 
 // ⏳ Countdown timer
 function startCountdown() {
+  const unlock = Number(unlockTimestamp);  // safely convert BigInt to number
+
+  if (isNaN(unlock) || unlock === 0) {
+    timerEl.textContent = "Invalid unlock time.";
+    return;
+  }
+
   const interval = setInterval(() => {
-    const now = Date.now();
-    const diff = Number(unlockTimestamp) * 1000 - now;
+    const now = Date.now();  // milliseconds
+    const diff = unlock * 1000 - now;
 
     if (diff <= 0) {
       timerEl.textContent = "Unlocked!";
@@ -71,6 +78,7 @@ function startCountdown() {
     }
   }, 1000);
 }
+
 
 // 🧾 Load user deposits and populate table
 async function loadUserData() {
