@@ -9,7 +9,7 @@
   <script defer src="app.js"></script>
 </head>
 <body>
-  <!-- Homepage / Landing -->
+  <!-- Homepage -->
   <div id="homepage" class="container active">
     <h1>Welcome to Crypto SaveLock</h1>
     <p>
@@ -20,45 +20,38 @@
     <button id="connectBtn">Connect Wallet</button>
   </div>
 
-  <!-- Dashboard after wallet connection -->
+  <!-- Dashboard -->
   <div id="dashboard" class="container">
     <div class="deposit-container">
-      <!-- Deposit Section Left -->
-      <div class="deposit-section">
-        <h3 id="depositHeading">Deposit your savings</h3>
-        <p id="afterUnlockText" style="display: none;">
-          If you participated in the savelock earlier,<br> click the claim button below <br> to retrieve your saved ETH.
-        </p>
-
-        <form id="depositForm">
-          <input type="number" id="depositAmount" placeholder="Ether deposit amount" min="0.01" step="0.01" required />
-          <button type="submit" id="depositBtn">Deposit</button>
-        </form>
-
-        <div id="inlineClaimWrapper" style="display: none;">
-          <button id="inlineClaimBtn">Claim Your Savings</button>
-        </div>
-      </div>
-
-
-      <!-- Balance Box Right -->
+      <!-- Total Balance -->
       <div class="total-balance-box">
         <span class="label">Total Balance:</span>
         <span id="totalDeposited">0 ETH</span>
       </div>
+
+      <!-- Deposit Section -->
+      <div id="depositSection">
+        <h3 id="depositTitle">Deposit your savings</h3>
+        <p id="claimNote" style="display:none;">
+          If you participated in the savelock earlier,<br />
+          click the claim button below to retrieve your saved ETH.
+        </p>
+        <form id="depositForm">
+          <input type="number" id="depositAmount" placeholder="Ether deposit amount" min="0.01" step="0.01" required />
+          <button type="submit" id="depositBtn">Deposit</button>
+        </form>
+        <div id="claimOnlyBtnWrapper" style="display:none;">
+          <button id="claimOnlyBtn">Claim Your Savings</button>
+        </div>
+      </div>
     </div>
 
-    <!-- Countdown Timer -->
+    <!-- Countdown -->
     <div id="countdown">
       Unlocks in: <span id="timer">Loading...</span>
     </div>
 
-    <!-- Claim Button -->
-    <div id="globalClaimWrapper">
-      <button id="globalClaimBtn">Claim Your Savings</button>
-    </div>
-
-    <!-- Deposit History Table -->
+    <!-- History -->
     <h3>Deposit History</h3>
     <table id="historyTable">
       <thead>
@@ -72,7 +65,6 @@
     </table>
   </div>
 
-  <!-- Init App Script -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const connectBtn = document.getElementById('connectBtn');
