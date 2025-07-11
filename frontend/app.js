@@ -66,7 +66,7 @@ function startCountdown() {
       const afterText = document.getElementById('afterUnlockText');
       const inlineClaim = document.getElementById('inlineClaimWrapper');
 
-      if (heading) heading.textContent = 'Saving Period has Ended';
+      if (heading) heading.textContent = 'Savelock Period has Ended';
       if (afterText) afterText.style.display = 'block';
       if (inlineClaim) inlineClaim.style.display = 'block';
 
