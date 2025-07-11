@@ -43,7 +43,7 @@ async function initApp() {
     dashboard.classList.add('active');
 
     const rawUnlockTime = await contract.getUnlockTime();
-    unlockTimestamp = Number(rawUnlockTime);  // ✅ Assign converted Number
+    unlockTimestamp = Number(rawUnlockTime);
     console.log("🔓 Unlock timestamp:", unlockTimestamp);
 
     startCountdown();
@@ -63,11 +63,14 @@ function startCountdown() {
 
   const interval = setInterval(() => {
     const now = Date.now();  // milliseconds
-    const diff = unlockTimestamp * 1000 - now;  // ✅ safe math
+    const diff = unlockTimestamp * 1000 - now;
 
     if (diff <= 0) {
       timerEl.textContent = "Unlocked!";
       clearInterval(interval);
+      // Optional: disable inputs
+      document.getElementById("depositBtn").disabled = true;
+      depositAmount.disabled = true;
     } else {
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
@@ -104,26 +107,45 @@ async function loadUserData() {
   });
 }
 
-// 💰 Deposit handler
+// 💰 Deposit handler with unlock check
 depositForm.addEventListener('submit', async (e) => {
   e.preventDefault();
+
+  const now = Date.now();
+  const unlockMs = unlockTimestamp * 1000;
+
+  if (now >= unlockMs) {
+    alert("🕒 The saving period is ended.\n\nIf you saved earlier, go ahead to claim your savings now.");
+    return;
+  }
+
   const amount = parseFloat(depositAmount.value);
   if (!amount || amount <= 0) return;
 
-  const tx = await contract.deposit({
-    value: ethers.parseEther(amount.toString())
-  });
-  await tx.wait();
+  try {
+    const tx = await contract.deposit({
+      value: ethers.parseEther(amount.toString())
+    });
+    await tx.wait();
 
-  depositAmount.value = '';
-  await loadUserData();
+    depositAmount.value = '';
+    await loadUserData();
+  } catch (err) {
+    console.error("❌ Deposit failed:", err);
+    alert("Deposit failed. See console for details.");
+  }
 });
 
 // ✅ Claim handler
 window.claimDeposit = async (index) => {
-  const tx = await contract.claim(index);
-  await tx.wait();
-  await loadUserData();
+  try {
+    const tx = await contract.claim(index);
+    await tx.wait();
+    await loadUserData();
+  } catch (err) {
+    console.error("❌ Claim failed:", err);
+    alert("Claim failed. See console for details.");
+  }
 };
 
 // 🎯 Connect button
