@@ -7,6 +7,10 @@ const historyTableBody = document.querySelector('#historyTable tbody');
 const totalDepositedEl = document.getElementById('totalDeposited');
 const timerEl = document.getElementById('timer');
 const claimWrapper = document.getElementById('globalClaimWrapper');
+const depositHeading = document.getElementById('depositHeading');
+const afterUnlockText = document.getElementById('afterUnlockText');
+const inlineClaimWrapper = document.getElementById('inlineClaimWrapper');
+const inlineClaimBtn = document.getElementById('inlineClaimBtn');
 
 const contractAddress = "0xE7D0F892f315B4E3d25cC91936Edb29492754Db5";
 
@@ -58,20 +62,16 @@ function startCountdown() {
       timerEl.textContent = "Unlocked!";
       clearInterval(interval);
 
-      // Hide deposit input and button
-      document.getElementById('depositForm').style.display = 'none';
+      // Hide deposit form
+      depositForm.style.display = 'none';
 
-      // Update heading and message
-      const heading = document.getElementById('depositHeading');
-      const afterText = document.getElementById('afterUnlockText');
-      const inlineClaim = document.getElementById('inlineClaimWrapper');
+      // Update title and show unlock message
+      if (depositHeading) depositHeading.textContent = "Savelock Period has Ended";
+      if (afterUnlockText) afterUnlockText.style.display = "block";
 
-      if (heading) heading.textContent = 'Savelock Period has Ended';
-      if (afterText) afterText.style.display = 'block';
-      if (inlineClaim) inlineClaim.style.display = 'block';
-
-      // Also show global claim button if needed
-      claimWrapper.style.display = 'block';
+      // Show inline claim, hide global claim
+      if (inlineClaimWrapper) inlineClaimWrapper.style.display = "block";
+      if (claimWrapper) claimWrapper.style.display = "none";
     } else {
       const d = Math.floor(diff / (1000 * 60 * 60 * 24));
       const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
@@ -113,7 +113,7 @@ depositForm.addEventListener('submit', async (e) => {
   e.preventDefault();
 
   if (Date.now() >= unlockTimestamp * 1000) {
-    alert("Savelock period has ended. Please claim your savings.");
+    alert("Saving period has ended. Please claim your savings.");
     return;
   }
 
@@ -131,8 +131,18 @@ depositForm.addEventListener('submit', async (e) => {
   }
 });
 
-// 🚀 Claim all unclaimed deposits (global claim button)
+// 🚀 Claim all unclaimed deposits (global claim button - fallback)
 claimWrapper.querySelector('button').addEventListener('click', async () => {
+  await handleClaim();
+});
+
+// 🚀 Inline claim button (main visible after unlock)
+inlineClaimBtn.addEventListener('click', async () => {
+  await handleClaim();
+});
+
+// 🧠 Claim function shared by both claim buttons
+async function handleClaim() {
   const deposits = await contract.getDeposits(userAddress);
 
   for (let i = 0; i < deposits.length; i++) {
@@ -147,25 +157,6 @@ claimWrapper.querySelector('button').addEventListener('click', async () => {
   }
 
   await loadUserData();
-});
-
-// 🚀 Inline claim button (replaces deposit section after unlock)
-const inlineClaimBtn = document.getElementById('inlineClaimBtn');
-if (inlineClaimBtn) {
-  inlineClaimBtn.addEventListener('click', async () => {
-    const deposits = await contract.getDeposits(userAddress);
-    for (let i = 0; i < deposits.length; i++) {
-      if (!deposits[i].claimed) {
-        try {
-          const tx = await contract.claim(i);
-          await tx.wait();
-        } catch (err) {
-          console.error(`Claim failed at index ${i}:`, err);
-        }
-      }
-    }
-    await loadUserData();
-  });
 }
 
 // 👟 Load connect button handler
