@@ -113,7 +113,7 @@ depositForm.addEventListener('submit', async (e) => {
   e.preventDefault();
 
   if (Date.now() >= unlockTimestamp * 1000) {
-    alert("Saving period has ended. Please claim your savings.");
+    alert("Savelock period has ended. Please claim your savings.");
     return;
   }
 
