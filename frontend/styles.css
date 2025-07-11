@@ -182,26 +182,3 @@ input[type="number"]::placeholder {
     margin-top: 0;
   }
 }
-#afterUnlockText {
-  font-size: 0.95rem;
-  margin: 10px 0 20px;
-  color: #ccc;
-  line-height: 1.5;
-}
-/* Logo Styling */
-.logo {
-  max-width: 300px;
-  margin-bottom: 5px;
-}
-
-/* Footer Styling */
-footer {
-  width: 100%;
-  padding: 20px;
-  background-color: #1a1a1a;
-  color: #ccc;
-  text-align: center;
-  font-size: 0.9rem;
-  margin-top: 60px;
-  border-top: 1px solid #333;
-}
