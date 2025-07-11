@@ -6,6 +6,7 @@ const depositAmount = document.getElementById('depositAmount');
 const historyTableBody = document.querySelector('#historyTable tbody');
 const totalDepositedEl = document.getElementById('totalDeposited');
 const timerEl = document.getElementById('timer');
+const claimWrapper = document.getElementById('globalClaimWrapper');
 
 const contractAddress = "0xE7D0F892f315B4E3d25cC91936Edb29492754Db5";
 
@@ -14,49 +15,38 @@ let provider, signer, contract, userAddress, unlockTimestamp;
 // ✅ Main function to initialize dApp
 async function initApp() {
   try {
-    console.log("🌐 Checking for wallet...");
-
     if (typeof window.ethereum === 'undefined') {
       alert("No wallet detected. Please install MetaMask.");
       return;
     }
 
-    console.log("🟢 Wallet detected. Connecting...");
-
     provider = new ethers.BrowserProvider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
 
-    console.log("✅ Wallet connection request sent");
-
     signer = await provider.getSigner();
     userAddress = await signer.getAddress();
-    console.log("👤 Address:", userAddress);
 
     const response = await fetch('./abi/contractABI.json');
     const abi = await response.json();
-    console.log("📄 ABI loaded");
-
     contract = new ethers.Contract(contractAddress, abi, signer);
-    console.log("✅ Contract instance created");
 
     homepage.classList.remove('active');
     dashboard.classList.add('active');
 
     const rawUnlockTime = await contract.getUnlockTime();
     unlockTimestamp = Number(rawUnlockTime);
-    console.log("🔓 Unlock timestamp:", unlockTimestamp);
 
     startCountdown();
     await loadUserData();
   } catch (err) {
-    console.error("❌ Failed to initialize dApp:", err);
-    alert("Failed to initialize dApp. Check console for details.");
+    console.error("❌ Initialization failed:", err);
+    alert("Error initializing dApp.");
   }
 }
 
 // ⏳ Countdown timer
 function startCountdown() {
-  if (isNaN(unlockTimestamp) || unlockTimestamp === 0) {
+  if (!unlockTimestamp) {
     timerEl.textContent = "Invalid unlock time.";
     return;
   }
@@ -68,22 +58,18 @@ function startCountdown() {
     if (diff <= 0) {
       timerEl.textContent = "Unlocked!";
       clearInterval(interval);
-
-      // 🔁 Hide deposit UI
-      document.getElementById('depositArea').style.display = 'none';
-
-      // ✅ Show claim button
-      document.getElementById('globalClaimWrapper').style.display = 'block';
+      document.getElementById('depositAmount').disabled = true;
+      document.getElementById('depositBtn').disabled = true;
+      claimWrapper.style.display = 'block';
     } else {
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-      const minutes = Math.floor((diff / (1000 * 60)) % 60);
-      const seconds = Math.floor((diff / 1000) % 60);
-      timerEl.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const m = Math.floor((diff / (1000 * 60)) % 60);
+      const s = Math.floor((diff / 1000) % 60);
+      timerEl.textContent = `${d}d ${h}h ${m}m ${s}s`;
     }
   }, 1000);
 }
-
 
 // 🧾 Load user deposits and populate table
 async function loadUserData() {
@@ -105,20 +91,16 @@ async function loadUserData() {
       <td>${status}</td>
     `;
 
-
     historyTableBody.appendChild(row);
   });
 }
 
-// 💰 Deposit handler with unlock check
+// 💰 Handle deposit
 depositForm.addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const now = Date.now();
-  const unlockMs = unlockTimestamp * 1000;
-
-  if (now >= unlockMs) {
-    alert("🕒 The saving period is ended.\n\nIf you saved earlier, go ahead to claim your savings now.");
+  if (Date.now() >= unlockTimestamp * 1000) {
+    alert("Saving period has ended. Please claim your savings.");
     return;
   }
 
@@ -126,53 +108,34 @@ depositForm.addEventListener('submit', async (e) => {
   if (!amount || amount <= 0) return;
 
   try {
-    const tx = await contract.deposit({
-      value: ethers.parseEther(amount.toString())
-    });
+    const tx = await contract.deposit({ value: ethers.parseEther(amount.toString()) });
     await tx.wait();
-
     depositAmount.value = '';
     await loadUserData();
   } catch (err) {
-    console.error("❌ Deposit failed:", err);
-    alert("Deposit failed. See console for details.");
+    console.error("Deposit failed:", err);
+    alert("Deposit failed. Check console for details.");
   }
 });
 
-// 🚀 Claim all unclaimed deposits
-document.getElementById('globalClaimBtn').addEventListener('click', async () => {
+// 🚀 Claim all
+claimWrapper.querySelector('button').addEventListener('click', async () => {
   const deposits = await contract.getDeposits(userAddress);
-
   for (let i = 0; i < deposits.length; i++) {
     if (!deposits[i].claimed) {
       try {
         const tx = await contract.claim(i);
         await tx.wait();
       } catch (err) {
-        console.error(`❌ Failed to claim index ${i}:`, err);
+        console.error(`Claim failed at index ${i}:`, err);
       }
     }
   }
-
   await loadUserData();
 });
 
-// ✅ Claim handler
-window.claimDeposit = async (index) => {
-  try {
-    const tx = await contract.claim(index);
-    await tx.wait();
-    await loadUserData();
-  } catch (err) {
-    console.error("❌ Claim failed:", err);
-    alert("Claim failed. See console for details.");
-  }
-};
-
-// 🎯 Connect button
 window.onload = () => {
   connectBtn.addEventListener('click', initApp);
 };
 
-// 🔁 Make globally accessible
 window.initApp = initApp;
