@@ -182,3 +182,9 @@ input[type="number"]::placeholder {
     margin-top: 0;
   }
 }
+#afterUnlockText {
+  font-size: 0.95rem;
+  margin: 10px 0 20px;
+  color: #ccc;
+  line-height: 1.5;
+}

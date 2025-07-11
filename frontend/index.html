@@ -25,12 +25,21 @@
     <div class="deposit-container">
       <!-- Deposit Section Left -->
       <div class="deposit-section">
-        <h3>Deposit your savings</h3>
+        <h3 id="depositHeading">Deposit your savings</h3>
+        <p id="afterUnlockText" style="display: none;">
+          If you participated in the savings earlier, click the claim button below to retrieve your saved ETH.
+        </p>
+
         <form id="depositForm">
           <input type="number" id="depositAmount" placeholder="Ether deposit amount" min="0.01" step="0.01" required />
           <button type="submit" id="depositBtn">Deposit</button>
         </form>
+
+        <div id="inlineClaimWrapper" style="display: none;">
+          <button id="inlineClaimBtn">Claim Your Savings</button>
+        </div>
       </div>
+
 
       <!-- Balance Box Right -->
       <div class="total-balance-box">
