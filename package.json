@@ -2,22 +2,24 @@
   "name": "cryptosavelock",
   "version": "1.0.0",
   "main": "hardhat.config.js",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "homepage": "https://NelsonXBT.github.io/CryptoSavelock",
   "scripts": {
+    "deploy": "gh-pages -d frontend",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/NelsonXBT/CryptoSavelock.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "bugs": {
     "url": "https://github.com/NelsonXBT/CryptoSavelock/issues"
   },
-  "homepage": "https://github.com/NelsonXBT/CryptoSavelock#readme",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^6.0.0",
+    "gh-pages": "^6.3.0",
     "hardhat": "^2.25.0"
   },
   "dependencies": {
@@ -170,6 +172,5 @@
     "yargs-parser": "^20.2.9",
     "yargs-unparser": "^2.0.0",
     "yocto-queue": "^0.1.0"
-  },
-  "description": ""
+  }
 }
