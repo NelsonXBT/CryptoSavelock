@@ -23,19 +23,19 @@
   <!-- Dashboard after wallet connection -->
   <div id="dashboard" class="container">
     <div class="deposit-container">
-      <!-- Deposit Form -->
+      <!-- Total Balance First -->
+      <div class="total-balance-box">
+        <span class="label">Total Balance:</span>
+        <span id="totalDeposited">0 ETH</span>
+      </div>
+
+      <!-- Deposit Form Second -->
       <div>
         <h3>Deposit your savings</h3>
         <form id="depositForm">
           <input type="number" id="depositAmount" placeholder="Ether deposit amount" min="0.01" step="0.01" required />
           <button type="submit" id="depositBtn">Deposit</button>
         </form>
-      </div>
-
-      <!-- Total Balance Box -->
-      <div class="total-balance-box">
-        <span class="label">Total Balance:</span>
-        <span id="totalDeposited">0 ETH</span>
       </div>
     </div>
 
