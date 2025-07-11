@@ -95,18 +95,17 @@ async function loadUserData() {
   deposits.forEach((d, index) => {
     const row = document.createElement('tr');
 
-    const claimable = !d.claimed && (Date.now() / 1000 >= unlockTimestamp);
-    const btn = claimable
-      ? `<button onclick="claimDeposit(${index})">Claim</button>`
-      : d.claimed
+    const status = d.claimed
       ? '✅ Claimed'
-      : '🔒 Locked';
+      : (Date.now() / 1000 >= unlockTimestamp ? '🔓 Claimable' : '🔒 Locked');
 
     row.innerHTML = `
       <td>${ethers.formatEther(d.amount)} ETH</td>
       <td>${new Date(Number(d.timestamp) * 1000).toLocaleString()}</td>
-      <td>${btn}</td>
+      <td>${status}</td>
     `;
+
+
     historyTableBody.appendChild(row);
   });
 }
