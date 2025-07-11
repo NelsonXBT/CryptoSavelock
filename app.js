@@ -42,8 +42,9 @@ async function initApp() {
     homepage.classList.remove('active');
     dashboard.classList.add('active');
 
-    unlockTimestamp = await contract.getUnlockTime();
-    console.log("🔓 Unlock timestamp:", Number(unlockTimestamp));
+    const rawUnlockTime = await contract.getUnlockTime();
+    unlockTimestamp = Number(rawUnlockTime);  // ✅ Assign converted Number
+    console.log("🔓 Unlock timestamp:", unlockTimestamp);
 
     startCountdown();
     await loadUserData();
@@ -55,16 +56,14 @@ async function initApp() {
 
 // ⏳ Countdown timer
 function startCountdown() {
-  const unlock = Number(unlockTimestamp);  // safely convert BigInt to number
-
-  if (isNaN(unlock) || unlock === 0) {
+  if (isNaN(unlockTimestamp) || unlockTimestamp === 0) {
     timerEl.textContent = "Invalid unlock time.";
     return;
   }
 
   const interval = setInterval(() => {
     const now = Date.now();  // milliseconds
-    const diff = unlock * 1000 - now;
+    const diff = unlockTimestamp * 1000 - now;  // ✅ safe math
 
     if (diff <= 0) {
       timerEl.textContent = "Unlocked!";
@@ -79,7 +78,6 @@ function startCountdown() {
   }, 1000);
 }
 
-
 // 🧾 Load user deposits and populate table
 async function loadUserData() {
   const deposits = await contract.getDeposits(userAddress);
@@ -90,7 +88,7 @@ async function loadUserData() {
   deposits.forEach((d, index) => {
     const row = document.createElement('tr');
 
-    const claimable = !d.claimed && (Date.now() / 1000 >= Number(unlockTimestamp));
+    const claimable = !d.claimed && (Date.now() / 1000 >= unlockTimestamp);
     const btn = claimable
       ? `<button onclick="claimDeposit(${index})">Claim</button>`
       : d.claimed
