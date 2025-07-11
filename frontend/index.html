@@ -11,6 +11,7 @@
 <body>
   <!-- Homepage -->
   <div id="homepage" class="container active">
+    <img src="./img/crypto-savelock-logo.png" alt="Crypto SaveLock Logo" class="logo" />
     <h1>Welcome to Crypto SaveLock</h1>
     <p>
       A Decentralized Monthly Crypto Savings Vault,<br>
@@ -22,6 +23,7 @@
 
   <!-- Dashboard -->
   <div id="dashboard" class="container">
+    <img src="Frontend/img/crypto-savelock-logo.png" alt="Crypto SaveLock Logo" class="logo" />
     <div class="deposit-container">
       <!-- Total Balance -->
       <div class="total-balance-box">
@@ -65,10 +67,16 @@
     </table>
   </div>
 
+  <!-- Footer -->
+  <footer>
+    <p>&copy; <span id="year"></span> Crypto SaveLock. All rights reserved.</p>
+  </footer>
+
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const connectBtn = document.getElementById('connectBtn');
       connectBtn.addEventListener('click', initApp);
+      document.getElementById('year').textContent = new Date().getFullYear();
     });
   </script>
 </body>
