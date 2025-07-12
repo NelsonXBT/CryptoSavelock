@@ -105,19 +105,36 @@ async function loadUserData() {
 
       historyTableBody.appendChild(row);
     });
-
-    // 🌐 Blockchain Stats Display
-    const contractStartTime = await contract.getStartTime();
-    const totalUsers = await contract.getTotalUsers();
-    const vaultBal = await provider.getBalance(contractAddress); // native ETH balance
-
-    startDateEl.textContent = new Date(Number(contractStartTime) * 1000).toLocaleString();
-    totalUsersEl.textContent = totalUsers.toString();
-    vaultBalanceEl.textContent = `${ethers.formatEther(vaultBal)} ETH`;
   } catch (err) {
-    console.error("Failed to load user or contract stats:", err);
+    console.error("❌ Failed to load user deposits:", err);
+  }
+
+  // 🌐 Blockchain Stats Display — handled separately
+  try {
+    const contractStartTime = await contract.getStartTime();
+    const dateStr = new Date(Number(contractStartTime) * 1000).toLocaleString();
+    startDateEl.textContent = dateStr;
+    console.log("✅ Start Time:", dateStr);
+  } catch (err) {
+    console.error("⚠️ getStartTime() failed:", err);
     startDateEl.textContent = "N/A";
+  }
+
+  try {
+    const totalUsers = await contract.getTotalUsers();
+    totalUsersEl.textContent = totalUsers.toString();
+    console.log("✅ Total Users:", totalUsers.toString());
+  } catch (err) {
+    console.error("⚠️ getTotalUsers() failed:", err);
     totalUsersEl.textContent = "N/A";
+  }
+
+  try {
+    const vaultBal = await provider.getBalance(contractAddress);
+    vaultBalanceEl.textContent = `${ethers.formatEther(vaultBal)} ETH`;
+    console.log("✅ Vault Balance:", ethers.formatEther(vaultBal));
+  } catch (err) {
+    console.error("⚠️ getBalance() failed:", err);
     vaultBalanceEl.textContent = "N/A";
   }
 }
