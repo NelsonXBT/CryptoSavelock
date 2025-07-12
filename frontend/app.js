@@ -32,8 +32,8 @@ async function initApp() {
     const abi = await response.json();
     contract = new ethers.Contract(contractAddress, abi, signer);
 
-    homepage.classList.remove('active');
-    dashboard.classList.add('active');
+    homepage.style.display = 'none';
+    dashboard.style.display = 'block';
 
     const rawUnlockTime = await contract.getUnlockTime();
     unlockTimestamp = Number(rawUnlockTime);
@@ -61,16 +61,10 @@ function startCountdown() {
       timerEl.textContent = "Unlocked!";
       clearInterval(interval);
 
-      // Hide deposit form
       if (depositForm) depositForm.style.display = 'none';
-
-      // Update heading and show post-unlock message
       if (depositHeading) depositHeading.textContent = "Savelock Period has Ended";
       if (afterUnlockText) afterUnlockText.style.display = "block";
-
-      // Show inline claim button
       if (inlineClaimWrapper) inlineClaimWrapper.style.display = "block";
-
     } else {
       const d = Math.floor(diff / (1000 * 60 * 60 * 24));
       const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
@@ -130,12 +124,12 @@ depositForm.addEventListener('submit', async (e) => {
   }
 });
 
-// 🚀 Claim all unclaimed deposits (inline button only)
+// 🚀 Inline claim button
 inlineClaimBtn.addEventListener('click', async () => {
   await handleClaim();
 });
 
-// 🧠 Shared claim logic
+// 🧠 Claim logic
 async function handleClaim() {
   const deposits = await contract.getDeposits(userAddress);
 
@@ -153,10 +147,12 @@ async function handleClaim() {
   await loadUserData();
 }
 
-// 👟 Load connect button handler
+// ✅ Setup connect button after DOM is ready
 window.onload = () => {
-  connectBtn.addEventListener('click', initApp);
+  if (connectBtn) {
+    connectBtn.addEventListener('click', initApp);
+  }
 };
 
-// 🌐 Expose initApp globally if needed elsewhere
+// 🌐 Optional: expose for manual use
 window.initApp = initApp;
