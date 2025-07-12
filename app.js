@@ -18,7 +18,6 @@ const vaultBalanceEl = document.getElementById('vaultBalance');
 
 const contractAddress = "0xF020f362CDe86004d94C832596415E082A77e203";
 
-
 let provider, signer, contract, userAddress, unlockTimestamp;
 
 // ✅ Initialize dApp
@@ -83,40 +82,43 @@ function startCountdown() {
 
 // 🧾 Load user deposits and update UI
 async function loadUserData() {
-  const deposits = await contract.getDeposits(userAddress);
-  const total = await contract.getTotalDeposited(userAddress);
-  totalDepositedEl.textContent = `${ethers.formatEther(total)} ETH`;
-
-  historyTableBody.innerHTML = '';
-
-  deposits.forEach((d, index) => {
-    const row = document.createElement('tr');
-
-    const isUnlocked = Date.now() / 1000 >= unlockTimestamp;
-    const status = d.claimed
-      ? '✅ Claimed'
-      : (isUnlocked ? '🔓 Claimable' : '🔒 Locked');
-
-    row.innerHTML = `
-      <td>${ethers.formatEther(d.amount)} ETH</td>
-      <td>${new Date(Number(d.timestamp) * 1000).toLocaleString()}</td>
-      <td>${status}</td>
-    `;
-
-    historyTableBody.appendChild(row);
-  });
-
-  // 🆕 New blockchain stats
   try {
-    const contractStartTime = await contract.getStartTime(); // UNIX timestamp
+    const deposits = await contract.getDeposits(userAddress);
+    const total = await contract.getTotalDeposited(userAddress);
+    totalDepositedEl.textContent = `${ethers.formatEther(total)} ETH`;
+
+    historyTableBody.innerHTML = '';
+
+    deposits.forEach((d, index) => {
+      const row = document.createElement('tr');
+
+      const isUnlocked = Date.now() / 1000 >= unlockTimestamp;
+      const status = d.claimed
+        ? '✅ Claimed'
+        : (isUnlocked ? '🔓 Claimable' : '🔒 Locked');
+
+      row.innerHTML = `
+        <td>${ethers.formatEther(d.amount)} ETH</td>
+        <td>${new Date(Number(d.timestamp) * 1000).toLocaleString()}</td>
+        <td>${status}</td>
+      `;
+
+      historyTableBody.appendChild(row);
+    });
+
+    // 🌐 Blockchain Stats Display
+    const contractStartTime = await contract.getStartTime();
     const totalUsers = await contract.getTotalUsers();
-    const vaultBal = await contract.getVaultBalance();
+    const vaultBal = await provider.getBalance(contractAddress); // native ETH balance
 
     startDateEl.textContent = new Date(Number(contractStartTime) * 1000).toLocaleString();
     totalUsersEl.textContent = totalUsers.toString();
     vaultBalanceEl.textContent = `${ethers.formatEther(vaultBal)} ETH`;
   } catch (err) {
-    console.error("Failed to load blockchain stats:", err);
+    console.error("Failed to load user or contract stats:", err);
+    startDateEl.textContent = "N/A";
+    totalUsersEl.textContent = "N/A";
+    vaultBalanceEl.textContent = "N/A";
   }
 }
 
