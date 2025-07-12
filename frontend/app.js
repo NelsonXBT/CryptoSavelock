@@ -11,6 +11,11 @@ const afterUnlockText = document.getElementById('claimNote');
 const inlineClaimWrapper = document.getElementById('claimOnlyBtnWrapper');
 const inlineClaimBtn = document.getElementById('claimOnlyBtn');
 
+// 📌 New elements for extra stats
+const startDateEl = document.getElementById('startDate');
+const totalUsersEl = document.getElementById('totalUsers');
+const vaultBalanceEl = document.getElementById('vaultBalance');
+
 const contractAddress = "0xE7D0F892f315B4E3d25cC91936Edb29492754Db5";
 
 let provider, signer, contract, userAddress, unlockTimestamp;
@@ -28,7 +33,6 @@ async function initApp() {
     signer = await provider.getSigner();
     userAddress = await signer.getAddress();
 
-    
     const response = await fetch('abi/contractABI.json');
     const abi = await response.json();
     contract = new ethers.Contract(contractAddress, abi, signer);
@@ -100,6 +104,19 @@ async function loadUserData() {
 
     historyTableBody.appendChild(row);
   });
+
+  // 🆕 New blockchain stats
+  try {
+    const contractStartTime = await contract.getStartTime(); // UNIX timestamp
+    const totalUsers = await contract.getTotalUsers();
+    const vaultBal = await contract.getVaultBalance();
+
+    startDateEl.textContent = new Date(Number(contractStartTime) * 1000).toLocaleString();
+    totalUsersEl.textContent = totalUsers.toString();
+    vaultBalanceEl.textContent = `${ethers.formatEther(vaultBal)} ETH`;
+  } catch (err) {
+    console.error("Failed to load blockchain stats:", err);
+  }
 }
 
 // 💰 Handle deposit submission
