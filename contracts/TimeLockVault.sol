@@ -4,6 +4,8 @@ pragma solidity ^0.8.19;
 contract TimeLockVault {
     address public owner;
     uint256 public unlockTime;
+    uint256 public startTime;
+    uint256 public userCount;
 
     struct Deposit {
         uint256 amount;
@@ -13,18 +15,26 @@ contract TimeLockVault {
 
     mapping(address => Deposit[]) public deposits;
     mapping(address => uint256) public totalDeposited;
+    mapping(address => bool) public hasDepositedBefore;
 
     event Deposited(address indexed user, uint256 amount, uint256 timestamp);
     event Claimed(address indexed user, uint256 amount);
 
     constructor() {
         owner = msg.sender;
-        unlockTime = block.timestamp + 6 hours;
+        startTime = block.timestamp;
+        unlockTime = block.timestamp + 10 days;
     }
 
     function deposit() external payable {
         require(block.timestamp < unlockTime, "Deposit period has ended");
         require(msg.value > 0, "Deposit amount must be greater than 0");
+
+        // Track unique users
+        if (!hasDepositedBefore[msg.sender]) {
+            hasDepositedBefore[msg.sender] = true;
+            userCount++;
+        }
 
         deposits[msg.sender].push(
             Deposit({
@@ -39,17 +49,23 @@ contract TimeLockVault {
         emit Deposited(msg.sender, msg.value, block.timestamp);
     }
 
-    function claim(uint256 index) external {
+    function claimAll() external {
         require(block.timestamp >= unlockTime, "Funds are still locked");
-        require(index < deposits[msg.sender].length, "Invalid deposit index");
 
-        Deposit storage userDeposit = deposits[msg.sender][index];
-        require(!userDeposit.claimed, "Already claimed");
+        Deposit[] storage userDeposits = deposits[msg.sender];
+        uint256 totalToClaim = 0;
 
-        userDeposit.claimed = true;
-        payable(msg.sender).transfer(userDeposit.amount);
+        for (uint256 i = 0; i < userDeposits.length; i++) {
+            if (!userDeposits[i].claimed) {
+                totalToClaim += userDeposits[i].amount;
+                userDeposits[i].claimed = true;
+            }
+        }
 
-        emit Claimed(msg.sender, userDeposit.amount);
+        require(totalToClaim > 0, "No unclaimed deposits");
+        payable(msg.sender).transfer(totalToClaim);
+
+        emit Claimed(msg.sender, totalToClaim);
     }
 
     function getDeposits(address user) external view returns (Deposit[] memory) {
@@ -60,7 +76,15 @@ contract TimeLockVault {
         return unlockTime;
     }
 
+    function getStartTime() external view returns (uint256) {
+        return startTime;
+    }
+
     function getTotalDeposited(address user) external view returns (uint256) {
         return totalDeposited[user];
+    }
+
+    function getUserCount() external view returns (uint256) {
+        return userCount;
     }
 }

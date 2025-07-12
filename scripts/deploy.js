@@ -1,16 +1,16 @@
 const { ethers } = require("hardhat");
 
 async function main() {
-  const Vault = await ethers.getContractFactory("contracts/TimeLockVault.sol:TimeLockVault"); // ✅ specify full path
+  const Vault = await ethers.getContractFactory("contracts/TimeLockVault.sol:TimeLockVault");
 
-  const vault = await Vault.deploy(); // no constructor args
+  const vault = await Vault.deploy();
 
-  await vault.waitForDeployment();
+  await vault.waitForDeployment(); // ✅ correct method in latest Hardhat versions
 
-  console.log("Vault deployed to:", await vault.getAddress());
+  console.log("✅ Vault deployed to:", await vault.getAddress());
 }
 
 main().catch((error) => {
-  console.error(error);
+  console.error("❌ Deployment failed:", error);
   process.exitCode = 1;
 });
