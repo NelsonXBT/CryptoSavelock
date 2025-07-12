@@ -6,11 +6,10 @@ const depositAmount = document.getElementById('depositAmount');
 const historyTableBody = document.querySelector('#historyTable tbody');
 const totalDepositedEl = document.getElementById('totalDeposited');
 const timerEl = document.getElementById('timer');
-const claimWrapper = document.getElementById('globalClaimWrapper');
-const depositHeading = document.getElementById('depositHeading');
-const afterUnlockText = document.getElementById('afterUnlockText');
-const inlineClaimWrapper = document.getElementById('inlineClaimWrapper');
-const inlineClaimBtn = document.getElementById('inlineClaimBtn');
+const depositHeading = document.getElementById('depositTitle');
+const afterUnlockText = document.getElementById('claimNote');
+const inlineClaimWrapper = document.getElementById('claimOnlyBtnWrapper');
+const inlineClaimBtn = document.getElementById('claimOnlyBtn');
 
 const contractAddress = "0xE7D0F892f315B4E3d25cC91936Edb29492754Db5";
 
@@ -63,15 +62,15 @@ function startCountdown() {
       clearInterval(interval);
 
       // Hide deposit form
-      depositForm.style.display = 'none';
+      if (depositForm) depositForm.style.display = 'none';
 
-      // Update title and show unlock message
+      // Update heading and show post-unlock message
       if (depositHeading) depositHeading.textContent = "Savelock Period has Ended";
       if (afterUnlockText) afterUnlockText.style.display = "block";
 
-      // Show inline claim, hide global claim
+      // Show inline claim button
       if (inlineClaimWrapper) inlineClaimWrapper.style.display = "block";
-      if (claimWrapper) claimWrapper.style.display = "none";
+
     } else {
       const d = Math.floor(diff / (1000 * 60 * 60 * 24));
       const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
@@ -113,7 +112,7 @@ depositForm.addEventListener('submit', async (e) => {
   e.preventDefault();
 
   if (Date.now() >= unlockTimestamp * 1000) {
-    alert("Saving period has ended. Please claim your savings.");
+    alert("Savelock period has ended. Please claim your savings.");
     return;
   }
 
@@ -131,17 +130,12 @@ depositForm.addEventListener('submit', async (e) => {
   }
 });
 
-// 🚀 Claim all unclaimed deposits (global claim button - fallback)
-claimWrapper.querySelector('button').addEventListener('click', async () => {
-  await handleClaim();
-});
-
-// 🚀 Inline claim button (main visible after unlock)
+// 🚀 Claim all unclaimed deposits (inline button only)
 inlineClaimBtn.addEventListener('click', async () => {
   await handleClaim();
 });
 
-// 🧠 Claim function shared by both claim buttons
+// 🧠 Shared claim logic
 async function handleClaim() {
   const deposits = await contract.getDeposits(userAddress);
 
