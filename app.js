@@ -121,11 +121,11 @@ async function loadUserData() {
   }
 
   try {
-    const totalUsers = await contract.getTotalUsers();
+    const totalUsers = await contract.getUserCount(); // ✅ corrected here
     totalUsersEl.textContent = totalUsers.toString();
     console.log("✅ Total Users:", totalUsers.toString());
   } catch (err) {
-    console.error("⚠️ getTotalUsers() failed:", err);
+    console.error("⚠️ getUserCount() failed:", err);
     totalUsersEl.textContent = "N/A";
   }
 
