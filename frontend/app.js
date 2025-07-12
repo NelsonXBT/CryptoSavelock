@@ -16,7 +16,8 @@ const startDateEl = document.getElementById('startDate');
 const totalUsersEl = document.getElementById('totalUsers');
 const vaultBalanceEl = document.getElementById('vaultBalance');
 
-const contractAddress = "0xE7D0F892f315B4E3d25cC91936Edb29492754Db5";
+const contractAddress = "0xF020f362CDe86004d94C832596415E082A77e203";
+
 
 let provider, signer, contract, userAddress, unlockTimestamp;
 
