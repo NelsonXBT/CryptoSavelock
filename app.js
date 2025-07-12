@@ -28,7 +28,8 @@ async function initApp() {
     signer = await provider.getSigner();
     userAddress = await signer.getAddress();
 
-    const response = await fetch('./abi/contractABI.json');
+    const response = await fetch(`${window.location.pathname.includes('CryptoSavelock') ? '/CryptoSavelock' : ''}/abi/contractABI.json`);
+
     const abi = await response.json();
     contract = new ethers.Contract(contractAddress, abi, signer);
 
