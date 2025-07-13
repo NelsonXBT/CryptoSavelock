@@ -24,8 +24,11 @@ const contractAddress = "0xF020f362CDe86004d94C832596415E082A77e203";
 
 async function initApp() {
   try {
+    console.log("Fetching ABI...");
     const response = await fetch("./abi/contractABI.json");
+    console.log("Fetch status:", response.status);
     const abi = await response.json();
+    console.log("Parsed ABI:", abi);
 
     // ✅ Web3Modal setup with both injected and WalletConnect
     const providerOptions = {
@@ -47,7 +50,8 @@ async function initApp() {
       }
     };
 
-    web3Modal = new window.Web3Modal.default({
+    // ✅ Fix: Do not use `.default` for Web3Modal v1.x
+    web3Modal = new window.Web3Modal({
       cacheProvider: false,
       providerOptions
     });
