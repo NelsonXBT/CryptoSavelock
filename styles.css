@@ -354,10 +354,7 @@ footer a:hover {
     font-size: 2rem;
     margin-bottom: 3rem;
   }
-  .container-active p {
-  padding: 0 20rem 0 20rem;
-}
-
+ 
   #connectBtn {
     font-size: 1.4rem;
     padding: 0.8rem 1.5rem;
@@ -424,13 +421,14 @@ input[type="number"] {
 }
 
 
+}
 
-
-
-
-
+@media screen and (min-width: 1080px) {
+   .container-active p {
+  padding: 0 15rem 0 15rem;
 }
 
 
+}
 
 
