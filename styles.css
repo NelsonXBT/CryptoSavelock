@@ -127,7 +127,7 @@ button {
   font-size: 1.1rem;
   font-weight: 600;
   transition: background-color 0.3s ease;
-  width: 70%;
+  width: 85%;
   max-width: 300px;
 }
 
@@ -154,10 +154,10 @@ input[type="number"] {
   padding: 14px;
   border-radius: 12px;
   border: 2px solid #d4a055;
-  width: 57%;
+  width: 70%;
   background-color: #0d0d0d;
   color: #fff;
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 input[type="number"]::placeholder {
