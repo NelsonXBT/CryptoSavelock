@@ -1,7 +1,6 @@
 /* ==== global ethers, Web3Modal, WalletConnectProvider ====== */
 
 let provider, signer, contract, userAddress, unlockTimestamp;
-let web3Modal;
 
 const connectBtn = document.getElementById('connectBtn');
 const homepage = document.getElementById('homepage');
@@ -22,18 +21,25 @@ const vaultBalanceEl = document.getElementById('vaultBalance');
 
 const contractAddress = "0xF020f362CDe86004d94C832596415E082A77e203";
 
-// ✅ FIXED initApp function for Web3Modal compatibility
 async function initApp() {
   try {
     console.log("Fetching ABI...");
     const response = await fetch("./abi/contractABI.json");
     const abi = await response.json();
 
+    // ✅ Safety check
+    if (!window.Web3Modal || !window.Web3Modal.default) {
+      throw new Error("Web3Modal failed to load or is not accessible.");
+    }
+
+    // ✅ Web3Modal v1.9.12 UMD fix
+    const Web3Modal = window.Web3Modal.default;
+
     const providerOptions = {
       injected: {
         display: {
           name: "Browser Wallet",
-          description: "Connect with MetaMask, Rabby, etc."
+          description: "Connect with MetaMask, Rabby, or Trust Wallet"
         },
         package: null
       },
@@ -48,7 +54,7 @@ async function initApp() {
       }
     };
 
-    web3Modal = new window.Web3Modal({
+    const web3Modal = new Web3Modal({
       cacheProvider: false,
       providerOptions
     });
