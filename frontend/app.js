@@ -1,4 +1,4 @@
-/* global ethers, Web3Modal, WalletConnectProvider */
+/* ==== global ethers, Web3Modal, WalletConnectProvider ====== */
 
 let provider, signer, contract, userAddress, unlockTimestamp;
 let web3Modal;
