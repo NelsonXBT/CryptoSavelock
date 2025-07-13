@@ -24,12 +24,12 @@ const vaultBalanceEl = document.getElementById('vaultBalance');
 
 // === Initialize Everything After Page Loads ===
 window.onload = () => {
-  const createWeb3Modal = window.Web3Modal;
+  const Web3Modal = window.Web3Modal;
   const EthereumProvider = window.ethereumProvider;
   const ethers = window.ethers;
 
   // ✅ Init Web3Modal
-  createWeb3Modal({
+  Web3Modal({
     projectId,
     themeMode: 'light',
     themeVariables: {
@@ -43,6 +43,8 @@ window.onload = () => {
       }
     ]
   });
+
+
 
   // ✅ Show Wallet Modal and Connect
   async function showModalAndConnect() {
