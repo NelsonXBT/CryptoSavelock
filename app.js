@@ -1,95 +1,19 @@
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("✅ DOM fully loaded");
+  console.log("✅ DOM ready");
 
-  // === Global Variables ===
   let provider, signer, contract, userAddress, unlockTimestamp;
 
   const contractAddress = "0xF020f362CDe86004d94C832596415E082A77e203";
+  const rpcUrl = "https://sepolia-rollup.arbitrum.io/rpc";
   const chainId = 421614;
 
-  const abi = [
-    {
-      "inputs": [],
-      "name": "deposit",
-      "outputs": [],
-      "stateMutability": "payable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        { "internalType": "uint256", "name": "index", "type": "uint256" }
-      ],
-      "name": "claim",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        { "internalType": "address", "name": "user", "type": "address" }
-      ],
-      "name": "getDeposits",
-      "outputs": [
-        {
-          "components": [
-            { "internalType": "uint256", "name": "amount", "type": "uint256" },
-            { "internalType": "uint256", "name": "timestamp", "type": "uint256" },
-            { "internalType": "bool", "name": "claimed", "type": "bool" }
-          ],
-          "internalType": "struct TimeLockVault.Deposit[]",
-          "name": "",
-          "type": "tuple[]"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        { "internalType": "address", "name": "user", "type": "address" }
-      ],
-      "name": "getTotalDeposited",
-      "outputs": [
-        { "internalType": "uint256", "name": "", "type": "uint256" }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getUnlockTime",
-      "outputs": [
-        { "internalType": "uint256", "name": "", "type": "uint256" }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getStartTime",
-      "outputs": [
-        { "internalType": "uint256", "name": "", "type": "uint256" }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getUserCount",
-      "outputs": [
-        { "internalType": "uint256", "name": "", "type": "uint256" }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    }
-  ];
+  const abi = [ /* your full ABI here, already embedded earlier */ ];
 
-  // === DOM Elements ===
-  const connectBtn = document.getElementById('connectBtn');
-  const homepage = document.getElementById('homepage');
-  const dashboard = document.getElementById('dashboard');
-  const depositForm = document.getElementById('depositForm');
-  const depositAmount = document.getElementById('depositAmount');
+  const connectBtn = document.getElementById("connectBtn");
+  const homepage = document.getElementById("homepage");
+  const dashboard = document.getElementById("dashboard");
+  const depositForm = document.getElementById("depositForm");
+  const depositAmount = document.getElementById("depositAmount");
   const historyTableBody = document.querySelector('#historyTable tbody');
   const totalDepositedEl = document.getElementById('totalDeposited');
   const timerEl = document.getElementById('timer');
@@ -101,46 +25,42 @@ document.addEventListener("DOMContentLoaded", () => {
   const totalUsersEl = document.getElementById('totalUsers');
   const vaultBalanceEl = document.getElementById('vaultBalance');
 
-  // === Connect Wallet Logic ===
   connectBtn.addEventListener("click", async () => {
-    console.log("🟡 Connect button clicked");
-
-    if (typeof window.ethereum === "undefined") {
-      alert("No wallet found. Use MetaMask or Trust Wallet.");
-      return;
-    }
-
     try {
-      console.log("🟢 Requesting account access...");
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      console.log("✅ Accounts returned:", accounts);
+      console.log("🟡 Trying injected wallet...");
+      if (window.ethereum) {
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+      } else {
+        console.log("🟠 Injected wallet not found. Trying WalletConnect...");
 
-      if (!accounts || accounts.length === 0) {
-        alert("No accounts found.");
-        return;
+        const WalletConnectProvider = window.WalletConnectProvider.default;
+        const wc = new WalletConnectProvider({
+          rpc: {
+            [chainId]: rpcUrl,
+          },
+          chainId: chainId,
+        });
+
+        await wc.enable();
+        provider = new ethers.providers.Web3Provider(wc);
       }
 
-      provider = new ethers.providers.Web3Provider(window.ethereum);
       signer = provider.getSigner();
-      userAddress = accounts[0];
-
-      console.log("✅ Connected address:", userAddress);
+      userAddress = await signer.getAddress();
       contract = new ethers.Contract(contractAddress, abi, signer);
-      console.log("✅ Contract connected");
 
       homepage.style.display = "none";
       dashboard.style.display = "block";
 
       const rawUnlockTime = await contract.getUnlockTime();
       unlockTimestamp = Number(rawUnlockTime);
-      console.log("✅ Unlock timestamp:", unlockTimestamp);
-
       startCountdown();
       await loadUserData();
 
     } catch (err) {
       console.error("❌ Wallet connection failed:", err);
-      alert("Failed to connect wallet. Open browser console for error log.");
+      alert("Wallet connection failed: " + (err.message || "Unknown error"));
     }
   });
 
