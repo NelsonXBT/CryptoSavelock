@@ -84,9 +84,32 @@ document.addEventListener("DOMContentLoaded", () => {
   const totalUsersEl = document.getElementById('totalUsers');
   const vaultBalanceEl = document.getElementById('vaultBalance');
 
+  function showStatus(message, duration = 3000) {
+    let statusDiv = document.getElementById("statusMessage");
+    if (!statusDiv) {
+      statusDiv = document.createElement("div");
+      statusDiv.id = "statusMessage";
+      statusDiv.style.position = "fixed";
+      statusDiv.style.top = "20px";
+      statusDiv.style.left = "50%";
+      statusDiv.style.transform = "translateX(-50%)";
+      statusDiv.style.backgroundColor = "#111";
+      statusDiv.style.color = "#fff";
+      statusDiv.style.padding = "12px 20px";
+      statusDiv.style.borderRadius = "10px";
+      statusDiv.style.boxShadow = "0 2px 10px rgba(0,0,0,0.3)";
+      statusDiv.style.zIndex = "9999";
+      document.body.appendChild(statusDiv);
+    }
+    statusDiv.textContent = message;
+    statusDiv.style.display = "block";
+    setTimeout(() => {
+      statusDiv.style.display = "none";
+    }, duration);
+  }
+
   connectBtn.addEventListener("click", async () => {
     try {
-      console.log("🟡 Checking for injected wallet...");
       if (!window.ethereum) {
         alert("Please use a browser with an Ethereum wallet like MetaMask.");
         return;
@@ -96,7 +119,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const { chainId: currentChainIdHex } = await provider.getNetwork();
       const currentChainId = parseInt(currentChainIdHex);
 
-      // ✅ Switch or add Arbitrum Sepolia if not already on it
       if (currentChainId !== chainId) {
         try {
           await window.ethereum.request({
@@ -104,7 +126,6 @@ document.addEventListener("DOMContentLoaded", () => {
             params: [{ chainId: "0x" + chainId.toString(16) }]
           });
         } catch (switchError) {
-          // If not added to wallet, try to add it
           if (switchError.code === 4902) {
             await window.ethereum.request({
               method: "wallet_addEthereumChain",
@@ -139,7 +160,6 @@ document.addEventListener("DOMContentLoaded", () => {
       unlockTimestamp = Number(rawUnlockTime);
       startCountdown();
       await loadUserData();
-
     } catch (err) {
       console.error("❌ Wallet connection failed:", err);
       alert("Wallet connection failed: " + (err.message || "Unknown error"));
@@ -231,30 +251,42 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
+      showStatus("Depositing...");
       const tx = await contract.deposit({ value: ethers.utils.parseEther(amount.toString()) });
       await tx.wait();
+      showStatus("Deposit successful", 3000);
       depositAmount.value = '';
       await loadUserData();
     } catch (err) {
       console.error("❌ Deposit failed:", err);
-      alert("Deposit failed.");
+      showStatus("Deposit failed", 3000);
     }
   });
 
   inlineClaimBtn.addEventListener("click", async () => {
-    const deposits = await contract.getDeposits(userAddress);
+    try {
+      const deposits = await contract.getDeposits(userAddress);
+      let claimedAny = false;
 
-    for (let i = 0; i < deposits.length; i++) {
-      if (!deposits[i].claimed) {
-        try {
+      for (let i = 0; i < deposits.length; i++) {
+        if (!deposits[i].claimed) {
+          showStatus(`Claiming deposit ${i + 1}...`);
           const tx = await contract.claim(i);
           await tx.wait();
-        } catch (err) {
-          console.error(`❌ Claim ${i} failed:`, err);
+          claimedAny = true;
         }
       }
-    }
 
-    await loadUserData();
+      if (claimedAny) {
+        showStatus("All eligible deposits claimed", 3000);
+      } else {
+        showStatus("No unclaimed deposits", 3000);
+      }
+
+      await loadUserData();
+    } catch (err) {
+      console.error("❌ Claim failed:", err);
+      showStatus("Claim failed", 3000);
+    }
   });
 });
