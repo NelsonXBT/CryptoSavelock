@@ -28,9 +28,9 @@
         <div id="homepage" class="container-active">
                 <h1>Welcome to Savelock</h1>
                 <p>
-                A Decentralized Monthly Crypto Savings Vault,
-                Crypto Savelock <br/> is a simple, secure, and transparent dApp
-                that helps users save <br/> crypto monthly with a time-locked vault mechanism.
+                A decentralized, self-custodial crypto vault for time locked saving.
+                Savelock is a simple, secure, and transparent dApp
+                that helps users save crypto monthly with a yealy time locked vault mechanism.
                 </p>
                 <button id="connectBtn">Connect Wallet</button>
         </div>
@@ -40,13 +40,13 @@
          <div id="dashboard" class="container" style="display:none;">
             <div class="saveLockStats">
             <span class="startDateInfo">
-                <p>Start Date: <span id="startDate">Loading...</span></p>
+                <p>Started: <span id="startDate">Loading...</span></p>
             </span>
             <span class="totalUsersInfo">
-                <p>Users: <span id="totalUsers">Loading...</span></p>
+                <p>Members: <span id="totalUsers">Loading...</span></p>
             </span>
             <span class="VaulbalanceInfo">
-                <p>Vault Balance: <span id="vaultBalance">Loading...</span></p>
+                <p>Balance: <span id="vaultBalance">Loading...</span></p>
             </span>
             </div>
             <div class="deposit-container">
@@ -65,10 +65,10 @@
                         </form>
                         <div id="claimOnlyBtnWrapper" style="display:none;">
                             <p id="claimNote" style="display:none;">
-                            If you participated in the savelock earlier,<br />
-                            click the claim button below to retrieve your saved ETH.
+                            Participated in the previous savelock? <br />
+                            click the claim button below to<br />  withdraw your saved ETH.
                             </p>
-                        <button id="claimOnlyBtn">Claim Your Savings</button>
+                        <button id="claimOnlyBtn">Withdraw</button>
                         </div>
                     </div>
 
@@ -78,6 +78,7 @@
             <!-- Countdown -->
              <div id="countdown">
                 Unlocks in: <span id="timer">Loading...</span>
+                <p>After the countdown Timer, all your savings will be unlocked for claiming</p>
              </div>
 
 
