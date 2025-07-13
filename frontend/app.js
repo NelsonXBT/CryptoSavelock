@@ -51,7 +51,7 @@ async function initApp() {
     };
 
     // ✅ Fix: Do not use `.default` for Web3Modal v1.x
-    const web3Modal = new Web3Modal.default({
+    const web3Modal = new Web3Modal({
       cacheProvider: false,
       providerOptions,
     });
