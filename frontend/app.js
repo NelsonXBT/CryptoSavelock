@@ -2,8 +2,85 @@
 let provider, signer, contract, userAddress, unlockTimestamp;
 
 const contractAddress = "0xF020f362CDe86004d94C832596415E082A77e203";
-const rpcUrl = "https://sepolia-rollup.arbitrum.io/rpc";
 const chainId = 421614;
+
+// === ABI (embedded directly) ===
+const abi = [
+  {
+    "inputs": [],
+    "name": "deposit",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "index", "type": "uint256" }
+    ],
+    "name": "claim",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "user", "type": "address" }
+    ],
+    "name": "getDeposits",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "amount", "type": "uint256" },
+          { "internalType": "uint256", "name": "timestamp", "type": "uint256" },
+          { "internalType": "bool", "name": "claimed", "type": "bool" }
+        ],
+        "internalType": "struct TimeLockVault.Deposit[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "user", "type": "address" }
+    ],
+    "name": "getTotalDeposited",
+    "outputs": [
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getUnlockTime",
+    "outputs": [
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getStartTime",
+    "outputs": [
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getUserCount",
+    "outputs": [
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
 
 // === DOM Elements ===
 const connectBtn = document.getElementById('connectBtn');
@@ -30,34 +107,18 @@ connectBtn.addEventListener("click", async () => {
   }
 
   try {
-    // Request access
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
     if (!accounts || accounts.length === 0) throw new Error("No accounts returned.");
 
-    // Init provider and signer
     provider = new ethers.providers.Web3Provider(window.ethereum);
     signer = provider.getSigner();
-    userAddress = accounts[0] || await signer.getAddress();
+    userAddress = accounts[0];
 
-    // Load ABI
-    let abi;
-    try {
-      const res = await fetch("./abi/contractABI.json");
-      abi = await res.json();
-    } catch (fetchError) {
-      console.error("❌ ABI load failed:", fetchError);
-      alert("Could not load contract ABI.");
-      return;
-    }
-
-    // Set contract
     contract = new ethers.Contract(contractAddress, abi, signer);
 
-    // Show dashboard
     homepage.style.display = "none";
     dashboard.style.display = "block";
 
-    // Load unlock time & user data
     const rawUnlockTime = await contract.getUnlockTime();
     unlockTimestamp = Number(rawUnlockTime);
     startCountdown();
