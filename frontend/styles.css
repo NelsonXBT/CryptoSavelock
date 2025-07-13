@@ -364,7 +364,11 @@ footer a:hover {
     border-width: 0.4rem;
     border-radius: 0.4rem;
   }
-
+input[type="number"] {
+  padding: 20px;
+  font-size: 1rem;
+}
+  
   footer {
     font-size: 1rem;
     padding: 2rem;
