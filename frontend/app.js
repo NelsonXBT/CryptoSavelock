@@ -3,7 +3,7 @@ let provider, signer, contract, userAddress, unlockTimestamp;
 
 const contractAddress = "0xF020f362CDe86004d94C832596415E082A77e203";
 const projectId = "c3b7d635ca869e04b3759d209a9081eb";
-const chainId = 421614;
+const chainId = 421614; // Arbitrum Sepolia
 
 // === DOM Elements ===
 const connectBtn = document.getElementById('connectBtn');
@@ -22,13 +22,13 @@ const startDateEl = document.getElementById('startDate');
 const totalUsersEl = document.getElementById('totalUsers');
 const vaultBalanceEl = document.getElementById('vaultBalance');
 
-// === Initialize App AFTER Scripts Load ===
+// === Initialize Everything After Page Loads ===
 window.onload = () => {
   const createWeb3Modal = window.Web3Modal;
   const EthereumProvider = window.ethereumProvider;
   const ethers = window.ethers;
 
-  // ✅ Init modal
+  // ✅ Init Web3Modal
   createWeb3Modal({
     projectId,
     themeMode: 'light',
@@ -44,6 +44,7 @@ window.onload = () => {
     ]
   });
 
+  // ✅ Show Wallet Modal and Connect
   async function showModalAndConnect() {
     try {
       window.Web3Modal.openModal();
@@ -77,6 +78,7 @@ window.onload = () => {
     }
   }
 
+  // ✅ Countdown Timer
   function startCountdown() {
     if (!unlockTimestamp) {
       timerEl.textContent = "Invalid unlock time.";
@@ -104,6 +106,7 @@ window.onload = () => {
     }, 1000);
   }
 
+  // ✅ Load Contract & User Data
   async function loadUserData() {
     try {
       const deposits = await contract.getDeposits(userAddress);
@@ -150,6 +153,7 @@ window.onload = () => {
     }
   }
 
+  // ✅ Deposit Handler
   depositForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -172,6 +176,7 @@ window.onload = () => {
     }
   });
 
+  // ✅ Claim All Unclaimed
   inlineClaimBtn.addEventListener("click", async () => {
     const deposits = await contract.getDeposits(userAddress);
 
@@ -189,5 +194,6 @@ window.onload = () => {
     await loadUserData();
   });
 
+  // ✅ Hook Wallet Connect
   connectBtn.addEventListener("click", showModalAndConnect);
 };
