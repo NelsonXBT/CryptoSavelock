@@ -32,29 +32,30 @@ async function initApp() {
 
     // ✅ Web3Modal setup with both injected and WalletConnect
     const providerOptions = {
-      injected: {
-        display: {
-          name: "Browser Wallet",
-          description: "Connect with MetaMask, Rabby, or Trust Wallet"
+    injected: {
+    display: {
+      name: "Browser Wallet",
+      description: "Connect with MetaMask, Rabby, or Trust Wallet"
+    },
+    package: null
+    },
+    walletconnect: {
+      package: window.WalletConnectProvider, // ✅ fix here
+      options: {
+        rpc: {
+          421614: "https://sepolia-rollup.arbitrum.io/rpc"
         },
-        package: null
-      },
-      walletconnect: {
-        package: WalletConnectProvider,
-        options: {
-          rpc: {
-            421614: "https://sepolia-rollup.arbitrum.io/rpc"
-          },
-          chainId: 421614
-        }
+        chainId: 421614
       }
-    };
+    }
+  };
 
-    // ✅ Fix: Do not use `.default` for Web3Modal v1.x
-    const web3Modal = new Web3Modal({
-      cacheProvider: false,
-      providerOptions,
-    });
+  // ✅ Fix this line
+  const web3Modal = new window.Web3Modal({
+    cacheProvider: false,
+    providerOptions
+  });
+
 
 
 
