@@ -217,10 +217,15 @@ input[type="number"]::placeholder {
   margin: 16px 0 70px 0;
   font-size: 1.4rem;
   font-weight: 500;
+  color: #d4a055;
 }
 #countdown p {
   font-size: 0.7rem;
   padding: 0 5rem 0 5rem;
+}
+#timer {
+  color: white;
+
 }
 
 
