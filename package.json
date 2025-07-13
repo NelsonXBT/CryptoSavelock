@@ -23,6 +23,9 @@
     "hardhat": "^2.25.0"
   },
   "dependencies": {
+    "@reown/walletkit": "^1.2.8",
+    "@walletconnect/core": "^2.21.4",
+    "@walletconnect/utils": "^2.21.4",
     "adm-zip": "^0.4.16",
     "agent-base": "^6.0.2",
     "aggregate-error": "^3.1.0",
