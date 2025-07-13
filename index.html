@@ -8,124 +8,99 @@
   <link rel="icon" href="./img/savelock-favicon.png">
   <link rel="stylesheet" href="styles.css" />
 
-  
-    <!-- Ethers.js -->
-<script defer src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <!-- Ethers.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 
-<!-- Web3Modal HTML SDK v2 with your projectId -->
-<script defer src="https://unpkg.com/@web3modal/html@2.6.3/dist/index.js"
-        data-project-id="c3b7d635ca869e04b3759d209a9081eb">
-</script>
+  <!-- Web3Modal v2 HTML SDK with your project ID -->
+  <script defer src="https://unpkg.com/@web3modal/html@2.6.3/dist/index.js"
+          data-project-id="c3b7d635ca869e04b3759d209a9081eb">
+  </script>
 
-<!-- Your App -->
-<script defer src="app.js"></script>
-
-
+  <!-- Your App Logic -->
+  <script defer src="app.js"></script>
 </head>
-
-
-
 
 <body>
   <div class="main-content">
-        <header>
-            <div class="navbar">
-            <div class="logo">
-                <a href="index.html"><img src="./img/savelock-logo.png" alt="CryptoTracker logo" /></a>
-                <a href="index.html"><h1>Savelock</h1></a>
-            </div>
-            </div>
-        </header>
-
-        <!-- Homepage -->
-        <div id="homepage" class="container-active" >
-                <h1>Welcome to Savelock</h1>
-                <p>
-                A decentralized, self-custodial crypto vault for time locked saving.
-                Savelock is a simple, secure, and transparent dApp
-                that helps users save crypto monthly with a yealy time locked vault mechanism.
-                </p>
-                <button id="connectBtn">Connect Wallet</button>
+    <header>
+      <div class="navbar">
+        <div class="logo">
+          <a href="index.html"><img src="./img/savelock-logo.png" alt="CryptoTracker logo" /></a>
+          <a href="index.html"><h1>Savelock</h1></a>
         </div>
+      </div>
+    </header>
 
-
-        <!-- !-- Dashboard --> 
-         <div id="dashboard" class="container" style="display:none;">
-            <div class="saveLockStats">
-            <span class="startDateInfo">
-                <p>Started: <span id="startDate">Loading...</span></p>
-            </span>
-            <span class="totalUsersInfo">
-                <p>Members: <span id="totalUsers">Loading...</span></p>
-            </span>
-            <span class="VaulbalanceInfo">
-                <p>Balance: <span id="vaultBalance">Loading...</span></p>
-            </span>
-            </div>
-            <div class="deposit-container">
-                    <!-- Total Balance -->
-                    <div class="total-balance-box">
-                        <span class="label">My Total Deposit:</span>
-                        <span id="totalDeposited">0 ETH</span>
-                    </div>
-                    <!-- Deposit Section -->
-                    <div id="depositSection">
-                        <h3 id="depositTitle">Deposit your savings</h3>
-                        
-                        <form id="depositForm">
-                        <input type="number" id="depositAmount" placeholder="Ether deposit amount" min="0.01" step="0.01" required />
-                        <button type="submit" id="depositBtn">Deposit</button>
-                        </form>
-                        <div id="claimOnlyBtnWrapper" style="display:none;">
-                            <p id="claimNote" style="display:none;">
-                            Participated in the previous savelock? <br />
-                            click the claim button below to<br />  withdraw your saved ETH.
-                            </p>
-                        <button id="claimOnlyBtn">Withdraw</button>
-                        </div>
-                    </div>
-
-            </div>
-
-
-            <!-- Countdown -->
-             <div id="countdown">
-                Unlocks in: <span id="timer">Loading...</span>
-                <p>After the countdown Timer, all your savings will be unlocked for claiming</p>
-             </div>
-
-
-
-             <!-- History -->
-             
-             <h3>Deposit History</h3>
-             <div class="history-section"></div>
-            <table id="historyTable">
-                <thead>
-                    <tr>
-                    <th>Amount (ETH)</th>
-                    <th>Date</th>
-                    <th>Action</th>
-                    </tr>
-                </thead>
-            <tbody></tbody>
-            </table>
-            </div>
-
-         </div>
-
-
-
-
+    <!-- Homepage -->
+    <div id="homepage" class="container-active">
+      <h1>Welcome to Savelock</h1>
+      <p>
+        A decentralized, self-custodial crypto vault for time-locked saving.
+        Savelock is a simple, secure, and transparent dApp
+        that helps users save crypto monthly with a yearly time-locked vault mechanism.
+      </p>
+      <button id="connectBtn">Connect Wallet</button>
     </div>
 
+    <!-- Dashboard -->
+    <div id="dashboard" class="container" style="display:none;">
+      <div class="saveLockStats">
+        <span class="startDateInfo">
+          <p>Started: <span id="startDate">Loading...</span></p>
+        </span>
+        <span class="totalUsersInfo">
+          <p>Members: <span id="totalUsers">Loading...</span></p>
+        </span>
+        <span class="VaulbalanceInfo">
+          <p>Balance: <span id="vaultBalance">Loading...</span></p>
+        </span>
+      </div>
 
+      <div class="deposit-container">
+        <div class="total-balance-box">
+          <span class="label">My Total Deposit:</span>
+          <span id="totalDeposited">0 ETH</span>
+        </div>
 
-  <!-- FOOTER SECTION -->
+        <div id="depositSection">
+          <h3 id="depositTitle">Deposit your savings</h3>
+          <form id="depositForm">
+            <input type="number" id="depositAmount" placeholder="Ether deposit amount" min="0.01" step="0.01" required />
+            <button type="submit" id="depositBtn">Deposit</button>
+          </form>
+
+          <div id="claimOnlyBtnWrapper" style="display:none;">
+            <p id="claimNote" style="display:none;">
+              Participated in the previous savelock? <br />
+              Click the claim button below to<br />withdraw your saved ETH.
+            </p>
+            <button id="claimOnlyBtn">Withdraw</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="countdown">
+        Unlocks in: <span id="timer">Loading...</span>
+        <p>After the countdown, your savings will be unlocked for claiming</p>
+      </div>
+
+      <h3>Deposit History</h3>
+      <div class="history-section"></div>
+      <table id="historyTable">
+        <thead>
+          <tr>
+            <th>Amount (ETH)</th>
+            <th>Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
   <footer>
-    <div><p>© Savelock 2025 | All rights reserved | Built by <a href="https://x.com/nelson_xbt" target="_blank">NelsonXBT </a></p></div>
- </footer>
-
-  
+    <div><p>© Savelock 2025 | All rights reserved | Built by <a href="https://x.com/nelson_xbt" target="_blank">NelsonXBT</a></p></div>
+  </footer>
 </body>
 </html>
