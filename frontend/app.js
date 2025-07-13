@@ -2,7 +2,7 @@
 let provider, signer, contract, userAddress, unlockTimestamp;
 
 const contractAddress = "0xF020f362CDe86004d94C832596415E082A77e203";
-const projectId = "c3b7d635ca869e04b3759d209a9081eb"; // ← Replace with your WC project ID
+const projectId = "c3b7d635ca869e04b3759d209a9081eb";
 const chainId = 421614; // Arbitrum Sepolia
 
 // === DOM Elements ===
@@ -23,28 +23,35 @@ const totalUsersEl = document.getElementById('totalUsers');
 const vaultBalanceEl = document.getElementById('vaultBalance');
 
 // === Web3Modal Setup ===
-const { EthereumClient, modalConnectors, walletConnectProvider } = window.W3m;
+const { EthereumProvider, defaultWagmiConfig, createWeb3Modal } = window.W3m;
 const ethers = window.ethers;
 
-const metadata = {
-  name: "Savelock",
-  description: "Time-locked crypto savings dApp",
-  url: "https://yoursite.com", // Your dApp URL
-  icons: ["https://yoursite.com/favicon.png"] // Your dApp logo (optional)
-};
-
-const ethereumClient = new EthereumClient({
+createWeb3Modal({
   projectId,
-  chains: [{ chainId, rpcUrl: "https://sepolia-rollup.arbitrum.io/rpc" }],
-  metadata
+  themeMode: 'light',
+  themeVariables: {
+    '--w3m-accent': '#0d9488', // Optional: customize color
+  },
+  chains: [
+    {
+      chainId,
+      name: 'Arbitrum Sepolia',
+      rpcUrl: 'https://sepolia-rollup.arbitrum.io/rpc',
+    }
+  ]
 });
 
-// Show Wallet Modal
+// Connect Wallet
 async function showModalAndConnect() {
   try {
-    const session = await ethereumClient.connect();
-    const walletProvider = await ethereumClient.getProvider();
-    provider = new ethers.providers.Web3Provider(walletProvider);
+    const ethereumProvider = new EthereumProvider({
+      projectId,
+      chains: [{ chainId, rpcUrl: 'https://sepolia-rollup.arbitrum.io/rpc' }]
+    });
+
+    await ethereumProvider.enable();
+
+    provider = new ethers.providers.Web3Provider(ethereumProvider);
     signer = provider.getSigner();
     userAddress = await signer.getAddress();
 
@@ -66,7 +73,7 @@ async function showModalAndConnect() {
   }
 }
 
-// ⏳ Countdown Timer
+// Countdown Timer
 function startCountdown() {
   if (!unlockTimestamp) {
     timerEl.textContent = "Invalid unlock time.";
@@ -94,7 +101,7 @@ function startCountdown() {
   }, 1000);
 }
 
-// 📊 Load User + Contract Data
+// Load User & Contract Data
 async function loadUserData() {
   try {
     const deposits = await contract.getDeposits(userAddress);
@@ -141,7 +148,7 @@ async function loadUserData() {
   }
 }
 
-// 💰 Deposit ETH
+// Deposit ETH
 depositForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -164,7 +171,7 @@ depositForm.addEventListener("submit", async (e) => {
   }
 });
 
-// 🔓 Claim All
+// Claim All
 inlineClaimBtn.addEventListener("click", async () => {
   const deposits = await contract.getDeposits(userAddress);
 
@@ -182,7 +189,7 @@ inlineClaimBtn.addEventListener("click", async () => {
   await loadUserData();
 });
 
-// 🎬 App Start
+// On Load
 window.onload = () => {
   connectBtn.addEventListener("click", showModalAndConnect);
 };
