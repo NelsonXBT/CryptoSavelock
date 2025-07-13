@@ -24,24 +24,33 @@ const contractAddress = "0xF020f362CDe86004d94C832596415E082A77e203";
 
 async function initApp() {
   try {
-    const response = await fetch("abi/contractABI.json");
+    const response = await fetch("./abi/contractABI.json");
     const abi = await response.json();
 
-    // ✅ Setup Web3Modal with WalletConnect
-    web3Modal = new window.Web3Modal.default({
-  cacheProvider: false,
-  providerOptions: {
-    walletconnect: {
-      package: WalletConnectProvider,
-      options: {
-        rpc: {
-          421614: "https://sepolia-rollup.arbitrum.io/rpc"
+    // ✅ Web3Modal setup with both injected and WalletConnect
+    const providerOptions = {
+      injected: {
+        display: {
+          name: "Browser Wallet",
+          description: "Connect with MetaMask, Rabby, or Trust Wallet"
+        },
+        package: null
+      },
+      walletconnect: {
+        package: WalletConnectProvider,
+        options: {
+          rpc: {
+            421614: "https://sepolia-rollup.arbitrum.io/rpc"
+          },
+          chainId: 421614
         }
       }
-    }
-  }
-});
+    };
 
+    web3Modal = new window.Web3Modal.default({
+      cacheProvider: false,
+      providerOptions
+    });
 
     const instance = await web3Modal.connect();
     provider = new ethers.providers.Web3Provider(instance);
