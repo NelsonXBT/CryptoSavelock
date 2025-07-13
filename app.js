@@ -18,9 +18,85 @@ const vaultBalanceEl = document.getElementById('vaultBalance');
 
 const contractAddress = "0xF020f362CDe86004d94C832596415E082A77e203";
 
+const abi = [
+  {
+    "inputs": [],
+    "name": "deposit",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "index", "type": "uint256" }
+    ],
+    "name": "claim",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "user", "type": "address" }
+    ],
+    "name": "getDeposits",
+    "outputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "amount", "type": "uint256" },
+          { "internalType": "uint256", "name": "timestamp", "type": "uint256" },
+          { "internalType": "bool", "name": "claimed", "type": "bool" }
+        ],
+        "internalType": "struct TimeLockVault.Deposit[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getUnlockTime",
+    "outputs": [
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "user", "type": "address" }
+    ],
+    "name": "getTotalDeposited",
+    "outputs": [
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getStartTime",
+    "outputs": [
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getUserCount",
+    "outputs": [
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
+
 let provider, signer, contract, userAddress, unlockTimestamp;
 
-// ✅ Initialize dApp
 async function initApp() {
   try {
     if (typeof window.ethereum === 'undefined') {
@@ -33,8 +109,6 @@ async function initApp() {
     signer = await provider.getSigner();
     userAddress = await signer.getAddress();
 
-    const response = await fetch('abi/contractABI.json');
-    const abi = await response.json();
     contract = new ethers.Contract(contractAddress, abi, signer);
 
     homepage.style.display = 'none';
@@ -51,7 +125,6 @@ async function initApp() {
   }
 }
 
-// ⏳ Countdown timer handler
 function startCountdown() {
   if (!unlockTimestamp) {
     timerEl.textContent = "Invalid unlock time.";
@@ -80,7 +153,6 @@ function startCountdown() {
   }, 1000);
 }
 
-// 🧾 Load user deposits and update UI
 async function loadUserData() {
   try {
     const deposits = await contract.getDeposits(userAddress);
@@ -109,21 +181,18 @@ async function loadUserData() {
     console.error("❌ Failed to load user deposits:", err);
   }
 
-  // 🌐 Blockchain Stats Display — handled separately
   try {
     const contractStartTime = await contract.getStartTime();
     const dateStr = new Date(Number(contractStartTime) * 1000).toLocaleString();
     startDateEl.textContent = dateStr;
-    console.log("✅ Start Time:", dateStr);
   } catch (err) {
     console.error("⚠️ getStartTime() failed:", err);
     startDateEl.textContent = "N/A";
   }
 
   try {
-    const totalUsers = await contract.getUserCount(); // ✅ corrected here
+    const totalUsers = await contract.getUserCount();
     totalUsersEl.textContent = totalUsers.toString();
-    console.log("✅ Total Users:", totalUsers.toString());
   } catch (err) {
     console.error("⚠️ getUserCount() failed:", err);
     totalUsersEl.textContent = "N/A";
@@ -132,14 +201,12 @@ async function loadUserData() {
   try {
     const vaultBal = await provider.getBalance(contractAddress);
     vaultBalanceEl.textContent = `${ethers.formatEther(vaultBal)} ETH`;
-    console.log("✅ Vault Balance:", ethers.formatEther(vaultBal));
   } catch (err) {
     console.error("⚠️ getBalance() failed:", err);
     vaultBalanceEl.textContent = "N/A";
   }
 }
 
-// 💰 Handle deposit submission
 depositForm.addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -162,12 +229,10 @@ depositForm.addEventListener('submit', async (e) => {
   }
 });
 
-// 🚀 Inline claim button
 inlineClaimBtn.addEventListener('click', async () => {
   await handleClaim();
 });
 
-// 🧠 Claim logic
 async function handleClaim() {
   const deposits = await contract.getDeposits(userAddress);
 
@@ -185,12 +250,10 @@ async function handleClaim() {
   await loadUserData();
 }
 
-// ✅ Setup connect button after DOM is ready
 window.onload = () => {
   if (connectBtn) {
     connectBtn.addEventListener('click', initApp);
   }
 };
 
-// 🌐 Optional: expose for manual use
 window.initApp = initApp;
