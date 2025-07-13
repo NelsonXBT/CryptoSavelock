@@ -31,16 +31,26 @@ connectBtn.addEventListener("click", async () => {
 
   try {
     // Request access
-    await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    if (!accounts || accounts.length === 0) throw new Error("No accounts returned.");
 
     // Init provider and signer
     provider = new ethers.providers.Web3Provider(window.ethereum);
     signer = provider.getSigner();
-    userAddress = await signer.getAddress();
+    userAddress = accounts[0] || await signer.getAddress();
 
-    // Fetch and set contract
-    const res = await fetch("./abi/contractABI.json");
-    const abi = await res.json();
+    // Load ABI
+    let abi;
+    try {
+      const res = await fetch("./abi/contractABI.json");
+      abi = await res.json();
+    } catch (fetchError) {
+      console.error("❌ ABI load failed:", fetchError);
+      alert("Could not load contract ABI.");
+      return;
+    }
+
+    // Set contract
     contract = new ethers.Contract(contractAddress, abi, signer);
 
     // Show dashboard
