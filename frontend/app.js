@@ -1,3 +1,8 @@
+/* global ethers, Web3Modal, WalletConnectProvider */
+
+let provider, signer, contract, userAddress, unlockTimestamp;
+let web3Modal;
+
 const connectBtn = document.getElementById('connectBtn');
 const homepage = document.getElementById('homepage');
 const dashboard = document.getElementById('dashboard');
@@ -11,30 +16,37 @@ const afterUnlockText = document.getElementById('claimNote');
 const inlineClaimWrapper = document.getElementById('claimOnlyBtnWrapper');
 const inlineClaimBtn = document.getElementById('claimOnlyBtn');
 
-// 📌 New elements for extra stats
 const startDateEl = document.getElementById('startDate');
 const totalUsersEl = document.getElementById('totalUsers');
 const vaultBalanceEl = document.getElementById('vaultBalance');
 
 const contractAddress = "0xF020f362CDe86004d94C832596415E082A77e203";
 
-let provider, signer, contract, userAddress, unlockTimestamp;
-
-// ✅ Initialize dApp
 async function initApp() {
   try {
-    if (typeof window.ethereum === 'undefined') {
-      alert("No wallet detected. Please install MetaMask.");
-      return;
-    }
+    const response = await fetch("abi/contractABI.json");
+    const abi = await response.json();
 
-    provider = new ethers.BrowserProvider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    signer = await provider.getSigner();
+    // ✅ Setup Web3Modal with WalletConnect
+    web3Modal = new Web3Modal({
+      cacheProvider: false,
+      providerOptions: {
+        walletconnect: {
+          package: WalletConnectProvider,
+          options: {
+            rpc: {
+              421614: "https://sepolia-rollup.arbitrum.io/rpc"
+            }
+          }
+        }
+      }
+    });
+
+    const instance = await web3Modal.connect();
+    provider = new ethers.providers.Web3Provider(instance);
+    signer = provider.getSigner();
     userAddress = await signer.getAddress();
 
-    const response = await fetch('abi/contractABI.json');
-    const abi = await response.json();
     contract = new ethers.Contract(contractAddress, abi, signer);
 
     homepage.style.display = 'none';
@@ -51,7 +63,6 @@ async function initApp() {
   }
 }
 
-// ⏳ Countdown timer handler
 function startCountdown() {
   if (!unlockTimestamp) {
     timerEl.textContent = "Invalid unlock time.";
@@ -65,11 +76,10 @@ function startCountdown() {
     if (diff <= 0) {
       timerEl.textContent = "Unlocked!";
       clearInterval(interval);
-
-      if (depositForm) depositForm.style.display = 'none';
-      if (depositHeading) depositHeading.textContent = "Savelock Period has Ended";
-      if (afterUnlockText) afterUnlockText.style.display = "block";
-      if (inlineClaimWrapper) inlineClaimWrapper.style.display = "block";
+      depositForm.style.display = 'none';
+      depositHeading.textContent = "Savelock Period has Ended";
+      afterUnlockText.style.display = "block";
+      inlineClaimWrapper.style.display = "block";
     } else {
       const d = Math.floor(diff / (1000 * 60 * 60 * 24));
       const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
@@ -80,50 +90,38 @@ function startCountdown() {
   }, 1000);
 }
 
-// 🧾 Load user deposits and update UI
 async function loadUserData() {
   try {
     const deposits = await contract.getDeposits(userAddress);
     const total = await contract.getTotalDeposited(userAddress);
-    totalDepositedEl.textContent = `${ethers.formatEther(total)} ETH`;
+    totalDepositedEl.textContent = `${ethers.utils.formatEther(total)} ETH`;
 
     historyTableBody.innerHTML = '';
-
-    deposits.forEach((d, index) => {
+    deposits.forEach((d) => {
       const row = document.createElement('tr');
-
       const isUnlocked = Date.now() / 1000 >= unlockTimestamp;
-      const status = d.claimed
-        ? '✅ Claimed'
-        : (isUnlocked ? '🔓 Claimable' : '🔒 Locked');
-
+      const status = d.claimed ? '✅ Claimed' : (isUnlocked ? '🔓 Claimable' : '🔒 Locked');
       row.innerHTML = `
-        <td>${ethers.formatEther(d.amount)} ETH</td>
+        <td>${ethers.utils.formatEther(d.amount)} ETH</td>
         <td>${new Date(Number(d.timestamp) * 1000).toLocaleString()}</td>
-        <td>${status}</td>
-      `;
-
+        <td>${status}</td>`;
       historyTableBody.appendChild(row);
     });
   } catch (err) {
     console.error("❌ Failed to load user deposits:", err);
   }
 
-  // 🌐 Blockchain Stats Display — handled separately
   try {
     const contractStartTime = await contract.getStartTime();
-    const dateStr = new Date(Number(contractStartTime) * 1000).toLocaleString();
-    startDateEl.textContent = dateStr;
-    console.log("✅ Start Time:", dateStr);
+    startDateEl.textContent = new Date(Number(contractStartTime) * 1000).toLocaleString();
   } catch (err) {
     console.error("⚠️ getStartTime() failed:", err);
     startDateEl.textContent = "N/A";
   }
 
   try {
-    const totalUsers = await contract.getUserCount(); // ✅ corrected here
+    const totalUsers = await contract.getUserCount();
     totalUsersEl.textContent = totalUsers.toString();
-    console.log("✅ Total Users:", totalUsers.toString());
   } catch (err) {
     console.error("⚠️ getUserCount() failed:", err);
     totalUsersEl.textContent = "N/A";
@@ -131,15 +129,13 @@ async function loadUserData() {
 
   try {
     const vaultBal = await provider.getBalance(contractAddress);
-    vaultBalanceEl.textContent = `${ethers.formatEther(vaultBal)} ETH`;
-    console.log("✅ Vault Balance:", ethers.formatEther(vaultBal));
+    vaultBalanceEl.textContent = `${ethers.utils.formatEther(vaultBal)} ETH`;
   } catch (err) {
     console.error("⚠️ getBalance() failed:", err);
     vaultBalanceEl.textContent = "N/A";
   }
 }
 
-// 💰 Handle deposit submission
 depositForm.addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -152,7 +148,7 @@ depositForm.addEventListener('submit', async (e) => {
   if (!amount || amount <= 0) return;
 
   try {
-    const tx = await contract.deposit({ value: ethers.parseEther(amount.toString()) });
+    const tx = await contract.deposit({ value: ethers.utils.parseEther(amount.toString()) });
     await tx.wait();
     depositAmount.value = '';
     await loadUserData();
@@ -162,13 +158,7 @@ depositForm.addEventListener('submit', async (e) => {
   }
 });
 
-// 🚀 Inline claim button
 inlineClaimBtn.addEventListener('click', async () => {
-  await handleClaim();
-});
-
-// 🧠 Claim logic
-async function handleClaim() {
   const deposits = await contract.getDeposits(userAddress);
 
   for (let i = 0; i < deposits.length; i++) {
@@ -183,14 +173,8 @@ async function handleClaim() {
   }
 
   await loadUserData();
-}
+});
 
-// ✅ Setup connect button after DOM is ready
 window.onload = () => {
-  if (connectBtn) {
-    connectBtn.addEventListener('click', initApp);
-  }
+  connectBtn.addEventListener('click', initApp);
 };
-
-// 🌐 Optional: expose for manual use
-window.initApp = initApp;
