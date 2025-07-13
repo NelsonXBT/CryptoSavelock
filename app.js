@@ -1,7 +1,11 @@
-/* ==== global ethers, Web3Modal, WalletConnectProvider ====== */
-
+// === Global Variables ===
 let provider, signer, contract, userAddress, unlockTimestamp;
 
+const contractAddress = "0xF020f362CDe86004d94C832596415E082A77e203";
+const projectId = "c3b7d635ca869e04b3759d209a9081eb";
+const chainId = 421614; // Arbitrum Sepolia
+
+// === DOM Elements ===
 const connectBtn = document.getElementById('connectBtn');
 const homepage = document.getElementById('homepage');
 const dashboard = document.getElementById('dashboard');
@@ -14,73 +18,62 @@ const depositHeading = document.getElementById('depositTitle');
 const afterUnlockText = document.getElementById('claimNote');
 const inlineClaimWrapper = document.getElementById('claimOnlyBtnWrapper');
 const inlineClaimBtn = document.getElementById('claimOnlyBtn');
-
 const startDateEl = document.getElementById('startDate');
 const totalUsersEl = document.getElementById('totalUsers');
 const vaultBalanceEl = document.getElementById('vaultBalance');
 
-const contractAddress = "0xF020f362CDe86004d94C832596415E082A77e203";
+// === Web3Modal Setup ===
+const { EthereumProvider, defaultWagmiConfig, createWeb3Modal } = window.W3m;
+const ethers = window.ethers;
 
-async function initApp() {
-  try {
-    console.log("Fetching ABI...");
-    const response = await fetch("./abi/contractABI.json");
-    const abi = await response.json();
-
-    // ✅ Safety check
-    if (!window.Web3Modal || !window.Web3Modal.default) {
-      throw new Error("Web3Modal failed to load or is not accessible.");
+createWeb3Modal({
+  projectId,
+  themeMode: 'light',
+  themeVariables: {
+    '--w3m-accent': '#0d9488', // Optional: customize color
+  },
+  chains: [
+    {
+      chainId,
+      name: 'Arbitrum Sepolia',
+      rpcUrl: 'https://sepolia-rollup.arbitrum.io/rpc',
     }
+  ]
+});
 
-    // ✅ Web3Modal v1.9.12 UMD fix
-    const Web3Modal = window.Web3Modal.default;
-
-    const providerOptions = {
-      injected: {
-        display: {
-          name: "Browser Wallet",
-          description: "Connect with MetaMask, Rabby, or Trust Wallet"
-        },
-        package: null
-      },
-      walletconnect: {
-        package: window.WalletConnectProvider,
-        options: {
-          rpc: {
-            421614: "https://sepolia-rollup.arbitrum.io/rpc"
-          },
-          chainId: 421614
-        }
-      }
-    };
-
-    const web3Modal = new Web3Modal({
-      cacheProvider: false,
-      providerOptions
+// Connect Wallet
+async function showModalAndConnect() {
+  try {
+    const ethereumProvider = new EthereumProvider({
+      projectId,
+      chains: [{ chainId, rpcUrl: 'https://sepolia-rollup.arbitrum.io/rpc' }]
     });
 
-    const instance = await web3Modal.connect();
-    provider = new ethers.providers.Web3Provider(instance);
+    await ethereumProvider.enable();
+
+    provider = new ethers.providers.Web3Provider(ethereumProvider);
     signer = provider.getSigner();
     userAddress = await signer.getAddress();
 
+    const response = await fetch("./abi/contractABI.json");
+    const abi = await response.json();
     contract = new ethers.Contract(contractAddress, abi, signer);
 
-    homepage.style.display = 'none';
-    dashboard.style.display = 'block';
+    homepage.style.display = "none";
+    dashboard.style.display = "block";
 
     const rawUnlockTime = await contract.getUnlockTime();
     unlockTimestamp = Number(rawUnlockTime);
 
     startCountdown();
     await loadUserData();
-
   } catch (err) {
-    console.error("❌ Initialization failed:", err);
+    console.error("❌ Failed to connect or initialize:", err);
     alert("Error initializing dApp.");
   }
 }
 
+// Countdown Timer
 function startCountdown() {
   if (!unlockTimestamp) {
     timerEl.textContent = "Invalid unlock time.";
@@ -94,7 +87,7 @@ function startCountdown() {
     if (diff <= 0) {
       timerEl.textContent = "Unlocked!";
       clearInterval(interval);
-      depositForm.style.display = 'none';
+      depositForm.style.display = "none";
       depositHeading.textContent = "Savelock Period has Ended";
       afterUnlockText.style.display = "block";
       inlineClaimWrapper.style.display = "block";
@@ -108,6 +101,7 @@ function startCountdown() {
   }, 1000);
 }
 
+// Load User & Contract Data
 async function loadUserData() {
   try {
     const deposits = await contract.getDeposits(userAddress);
@@ -126,14 +120,14 @@ async function loadUserData() {
       historyTableBody.appendChild(row);
     });
   } catch (err) {
-    console.error("❌ Failed to load user deposits:", err);
+    console.error("❌ Error loading deposits:", err);
   }
 
   try {
     const contractStartTime = await contract.getStartTime();
     startDateEl.textContent = new Date(Number(contractStartTime) * 1000).toLocaleString();
   } catch (err) {
-    console.error("⚠️ getStartTime() failed:", err);
+    console.error("⚠️ getStartTime failed:", err);
     startDateEl.textContent = "N/A";
   }
 
@@ -141,7 +135,7 @@ async function loadUserData() {
     const totalUsers = await contract.getUserCount();
     totalUsersEl.textContent = totalUsers.toString();
   } catch (err) {
-    console.error("⚠️ getUserCount() failed:", err);
+    console.error("⚠️ getUserCount failed:", err);
     totalUsersEl.textContent = "N/A";
   }
 
@@ -149,12 +143,13 @@ async function loadUserData() {
     const vaultBal = await provider.getBalance(contractAddress);
     vaultBalanceEl.textContent = `${ethers.utils.formatEther(vaultBal)} ETH`;
   } catch (err) {
-    console.error("⚠️ getBalance() failed:", err);
+    console.error("⚠️ getBalance failed:", err);
     vaultBalanceEl.textContent = "N/A";
   }
 }
 
-depositForm.addEventListener('submit', async (e) => {
+// Deposit ETH
+depositForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   if (Date.now() >= unlockTimestamp * 1000) {
@@ -171,12 +166,13 @@ depositForm.addEventListener('submit', async (e) => {
     depositAmount.value = '';
     await loadUserData();
   } catch (err) {
-    console.error("Deposit failed:", err);
-    alert("Deposit failed. Check console for details.");
+    console.error("❌ Deposit failed:", err);
+    alert("Deposit failed. See console.");
   }
 });
 
-inlineClaimBtn.addEventListener('click', async () => {
+// Claim All
+inlineClaimBtn.addEventListener("click", async () => {
   const deposits = await contract.getDeposits(userAddress);
 
   for (let i = 0; i < deposits.length; i++) {
@@ -185,7 +181,7 @@ inlineClaimBtn.addEventListener('click', async () => {
         const tx = await contract.claim(i);
         await tx.wait();
       } catch (err) {
-        console.error(`Claim failed at index ${i}:`, err);
+        console.error(`❌ Claim at index ${i} failed:`, err);
       }
     }
   }
@@ -193,6 +189,7 @@ inlineClaimBtn.addEventListener('click', async () => {
   await loadUserData();
 });
 
+// On Load
 window.onload = () => {
-  connectBtn.addEventListener('click', initApp);
+  connectBtn.addEventListener("click", showModalAndConnect);
 };
