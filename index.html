@@ -8,17 +8,19 @@
   <link rel="icon" href="./img/savelock-favicon.png">
   <link rel="stylesheet" href="styles.css" />
 
-  <!-- ✅ Wallet & Provider Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <script src="https://unpkg.com/web3modal@1.9.12/dist/umd/index.min.js"></script>
+  
+    <!-- WalletConnect + Ethers + Web3Modal -->
+    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script src="https://unpkg.com/web3modal@1.9.12/dist/web3modal.umd.js"></script>
+
 
 
 
 
 
   <!-- ✅ Your App Script -->
-  
+  <script defer src="app.js"></script>
 </head>
 
 
@@ -125,9 +127,5 @@
  </footer>
 
   
-
-
-
- <script defer src="app.js"></script>
 </body>
 </html>

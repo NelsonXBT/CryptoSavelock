@@ -22,42 +22,36 @@ const vaultBalanceEl = document.getElementById('vaultBalance');
 
 const contractAddress = "0xF020f362CDe86004d94C832596415E082A77e203";
 
+// ✅ FIXED initApp function for Web3Modal compatibility
 async function initApp() {
   try {
     console.log("Fetching ABI...");
     const response = await fetch("./abi/contractABI.json");
-    console.log("Fetch status:", response.status);
     const abi = await response.json();
-    console.log("Parsed ABI:", abi);
 
-    // ✅ Web3Modal setup with both injected and WalletConnect
     const providerOptions = {
-    injected: {
-    display: {
-      name: "Browser Wallet",
-      description: "Connect with MetaMask, Rabby, or Trust Wallet"
-    },
-    package: null
-    },
-    walletconnect: {
-      package: window.WalletConnectProvider, // ✅ fix here
-      options: {
-        rpc: {
-          421614: "https://sepolia-rollup.arbitrum.io/rpc"
+      injected: {
+        display: {
+          name: "Browser Wallet",
+          description: "Connect with MetaMask, Rabby, etc."
         },
-        chainId: 421614
+        package: null
+      },
+      walletconnect: {
+        package: window.WalletConnectProvider,
+        options: {
+          rpc: {
+            421614: "https://sepolia-rollup.arbitrum.io/rpc"
+          },
+          chainId: 421614
+        }
       }
-    }
-  };
+    };
 
-  // ✅ Fix this line
-  const web3Modal = new window.Web3Modal({
-    cacheProvider: false,
-    providerOptions
-  });
-
-
-
+    web3Modal = new window.Web3Modal({
+      cacheProvider: false,
+      providerOptions
+    });
 
     const instance = await web3Modal.connect();
     provider = new ethers.providers.Web3Provider(instance);
@@ -74,6 +68,7 @@ async function initApp() {
 
     startCountdown();
     await loadUserData();
+
   } catch (err) {
     console.error("❌ Initialization failed:", err);
     alert("Error initializing dApp.");
