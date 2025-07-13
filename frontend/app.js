@@ -1,4 +1,4 @@
-// == Global vars ==
+// === Global Variables ===
 let provider, signer, contract, userAddress, unlockTimestamp;
 
 const contractAddress = "0xF020f362CDe86004d94C832596415E082A77e203";
@@ -6,7 +6,7 @@ const projectId = "c3b7d635ca869e04b3759d209a9081eb";
 const chainId = 421614;
 const rpcUrl = "https://sepolia-rollup.arbitrum.io/rpc";
 
-// DOM references
+// === DOM Elements ===
 const connectBtn = document.getElementById('connectBtn');
 const homepage = document.getElementById('homepage');
 const dashboard = document.getElementById('dashboard');
@@ -23,147 +23,159 @@ const startDateEl = document.getElementById('startDate');
 const totalUsersEl = document.getElementById('totalUsers');
 const vaultBalanceEl = document.getElementById('vaultBalance');
 
-window.onload = () => {
-  const ethers = window.ethers;
-  const w3m = window.w3m;
-
-  if (!w3m || typeof w3m.createWeb3Modal !== 'function') {
-    console.error("⚠️ Web3Modal not loaded! Check your HTML UMD script.");
-    alert("Web3Modal failed to load—check your script tags.");
+window.onload = async () => {
+  if (!window.w3m) {
+    console.error("❌ Web3Modal not loaded.");
+    alert("Web3Modal failed to load. Please refresh.");
     return;
   }
 
-  const { createWeb3Modal, EthereumProvider } = w3m;
+  const { createWeb3Modal, EthereumProvider } = window.w3m;
+  const ethers = window.ethers;
 
-  const modal = createWeb3Modal({
+  createWeb3Modal({
     projectId,
     themeMode: 'light',
-    themeVariables: {
-      '--w3m-accent': '#0d9488'
-    },
-    chains: [{ chainId, name: 'Arbitrum Sepolia', rpcUrl }]
+    chains: [{ chainId, rpcUrl, name: "Arbitrum Sepolia" }]
   });
 
   connectBtn.addEventListener("click", async () => {
     try {
-      modal.openModal();
-
-      const ethProvider = new EthereumProvider({
+      const ethereumProvider = new EthereumProvider({
         projectId,
         chains: [{ chainId, rpcUrl }]
       });
 
-      await ethProvider.enable();
+      await ethereumProvider.enable();
 
-      provider = new ethers.providers.Web3Provider(ethProvider);
+      provider = new ethers.providers.Web3Provider(ethereumProvider);
       signer = provider.getSigner();
       userAddress = await signer.getAddress();
 
-      const response = await fetch("./abi/contractABI.json");
-      const abi = await response.json();
+      const res = await fetch("./abi/contractABI.json");
+      const abi = await res.json();
       contract = new ethers.Contract(contractAddress, abi, signer);
 
       homepage.style.display = "none";
       dashboard.style.display = "block";
 
-      unlockTimestamp = Number(await contract.getUnlockTime());
+      const rawUnlockTime = await contract.getUnlockTime();
+      unlockTimestamp = Number(rawUnlockTime);
 
       startCountdown();
-      loadUserData();
+      await loadUserData();
     } catch (err) {
       console.error("❌ Wallet connection failed:", err);
-      alert("Failed to connect wallet. Check console for details.");
+      alert("Failed to connect wallet.");
     }
-  });
-
-  function startCountdown() {
-    if (!unlockTimestamp) {
-      timerEl.textContent = "Invalid unlock time.";
-      return;
-    }
-    const iv = setInterval(() => {
-      const diff = unlockTimestamp * 1000 - Date.now();
-      if (diff <= 0) {
-        timerEl.textContent = "Unlocked!";
-        clearInterval(iv);
-        depositForm.style.display = 'none';
-        depositHeading.textContent = "Savelock Period has Ended";
-        afterUnlockText.style.display = 'block';
-        inlineClaimWrapper.style.display = 'block';
-      } else {
-        const d = Math.floor(diff / 86400000);
-        const h = Math.floor((diff / 3600000) % 24);
-        const m = Math.floor((diff / 60000) % 60);
-        const s = Math.floor((diff / 1000) % 60);
-        timerEl.textContent = `${d}d ${h}h ${m}m ${s}s`;
-      }
-    }, 1000);
-  }
-
-  async function loadUserData() {
-    try {
-      const deposits = await contract.getDeposits(userAddress);
-      const total = await contract.getTotalDeposited(userAddress);
-      totalDepositedEl.textContent = `${ethers.utils.formatEther(total)} ETH`;
-
-      historyTableBody.innerHTML = '';
-      deposits.forEach(d => {
-        const row = document.createElement('tr');
-        const unlocked = Date.now()/1000 >= unlockTimestamp;
-        const status = d.claimed ? '✅ Claimed' : (unlocked ? '🔓 Claimable' : '🔒 Locked');
-        row.innerHTML = `
-          <td>${ethers.utils.formatEther(d.amount)} ETH</td>
-          <td>${new Date(Number(d.timestamp)*1000).toLocaleString()}</td>
-          <td>${status}</td>`;
-        historyTableBody.appendChild(row);
-      });
-    } catch (e) {
-      console.error("Error loading deposits", e);
-    }
-    try {
-      const st = await contract.getStartTime();
-      startDateEl.textContent = new Date(Number(st)*1000).toLocaleString();
-    } catch { startDateEl.textContent = "N/A"; }
-    try {
-      const ct = await contract.getUserCount(); totalUsersEl.textContent = ct.toString();
-    } catch { totalUsersEl.textContent = "N/A"; }
-    try {
-      const vb = await provider.getBalance(contractAddress);
-      vaultBalanceEl.textContent = `${ethers.utils.formatEther(vb)} ETH`;
-    } catch { vaultBalanceEl.textContent = "N/A"; }
-  }
-
-  depositForm.addEventListener("submit", async e => {
-    e.preventDefault();
-    if (Date.now() >= unlockTimestamp*1000) {
-      alert("Savings period ended.");
-      return;
-    }
-    const amt = parseFloat(depositAmount.value);
-    if (!amt || amt <= 0) return;
-    try {
-      const tx = await contract.deposit({ value: ethers.utils.parseEther(amt.toString()) });
-      await tx.wait();
-      depositAmount.value = '';
-      loadUserData();
-    } catch (err) {
-      console.error("Deposit failed", err);
-      alert("Deposit failed. See console.");
-    }
-  });
-
-  inlineClaimBtn.addEventListener("click", async () => {
-    const deps = await contract.getDeposits(userAddress);
-    for (let i = 0; i < deps.length; i++) {
-      if (!deps[i].claimed) {
-        try {
-          const tx = await contract.claim(i);
-          await tx.wait();
-        } catch (e) {
-          console.error(`Claim ${i} failed`, e);
-        }
-      }
-    }
-    loadUserData();
   });
 };
+
+function startCountdown() {
+  if (!unlockTimestamp) {
+    timerEl.textContent = "Invalid unlock time.";
+    return;
+  }
+
+  const interval = setInterval(() => {
+    const now = Date.now();
+    const diff = unlockTimestamp * 1000 - now;
+
+    if (diff <= 0) {
+      timerEl.textContent = "Unlocked!";
+      clearInterval(interval);
+      depositForm.style.display = "none";
+      depositHeading.textContent = "Savelock Period has Ended";
+      afterUnlockText.style.display = "block";
+      inlineClaimWrapper.style.display = "block";
+    } else {
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const m = Math.floor((diff / (1000 * 60)) % 60);
+      const s = Math.floor((diff / 1000) % 60);
+      timerEl.textContent = `${d}d ${h}h ${m}m ${s}s`;
+    }
+  }, 1000);
+}
+
+async function loadUserData() {
+  try {
+    const deposits = await contract.getDeposits(userAddress);
+    const total = await contract.getTotalDeposited(userAddress);
+    totalDepositedEl.textContent = `${ethers.utils.formatEther(total)} ETH`;
+
+    historyTableBody.innerHTML = '';
+    deposits.forEach((d) => {
+      const row = document.createElement('tr');
+      const isUnlocked = Date.now() / 1000 >= unlockTimestamp;
+      const status = d.claimed ? '✅ Claimed' : (isUnlocked ? '🔓 Claimable' : '🔒 Locked');
+      row.innerHTML = `
+        <td>${ethers.utils.formatEther(d.amount)} ETH</td>
+        <td>${new Date(Number(d.timestamp) * 1000).toLocaleString()}</td>
+        <td>${status}</td>`;
+      historyTableBody.appendChild(row);
+    });
+  } catch (err) {
+    console.error("❌ Error loading deposits:", err);
+  }
+
+  try {
+    const contractStartTime = await contract.getStartTime();
+    startDateEl.textContent = new Date(Number(contractStartTime) * 1000).toLocaleString();
+  } catch {
+    startDateEl.textContent = "N/A";
+  }
+
+  try {
+    const totalUsers = await contract.getUserCount();
+    totalUsersEl.textContent = totalUsers.toString();
+  } catch {
+    totalUsersEl.textContent = "N/A";
+  }
+
+  try {
+    const vaultBal = await provider.getBalance(contractAddress);
+    vaultBalanceEl.textContent = `${ethers.utils.formatEther(vaultBal)} ETH`;
+  } catch {
+    vaultBalanceEl.textContent = "N/A";
+  }
+}
+
+depositForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  if (Date.now() >= unlockTimestamp * 1000) {
+    alert("Savelock period has ended.");
+    return;
+  }
+
+  const amount = parseFloat(depositAmount.value);
+  if (!amount || amount <= 0) return;
+
+  try {
+    const tx = await contract.deposit({ value: ethers.utils.parseEther(amount.toString()) });
+    await tx.wait();
+    depositAmount.value = '';
+    await loadUserData();
+  } catch (err) {
+    console.error("❌ Deposit failed:", err);
+    alert("Deposit failed.");
+  }
+});
+
+inlineClaimBtn.addEventListener("click", async () => {
+  const deposits = await contract.getDeposits(userAddress);
+
+  for (let i = 0; i < deposits.length; i++) {
+    if (!deposits[i].claimed) {
+      try {
+        const tx = await contract.claim(i);
+        await tx.wait();
+      } catch (err) {
+        console.error(`❌ Claim ${i} failed:`, err);
+      }
+    }
+  }
+
+  await loadUserData();
+});
