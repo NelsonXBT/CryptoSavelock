@@ -2,9 +2,8 @@
 let provider, signer, contract, userAddress, unlockTimestamp;
 
 const contractAddress = "0xF020f362CDe86004d94C832596415E082A77e203";
-const projectId = "c3b7d635ca869e04b3759d209a9081eb";
-const chainId = 421614;
 const rpcUrl = "https://sepolia-rollup.arbitrum.io/rpc";
+const chainId = 421614;
 
 // === DOM Elements ===
 const connectBtn = document.getElementById('connectBtn');
@@ -23,54 +22,44 @@ const startDateEl = document.getElementById('startDate');
 const totalUsersEl = document.getElementById('totalUsers');
 const vaultBalanceEl = document.getElementById('vaultBalance');
 
-window.onload = async () => {
-  if (!window.w3m) {
-    console.error("❌ Web3Modal not loaded.");
-    alert("Web3Modal failed to load. Please refresh.");
+// === Connect Wallet Logic ===
+connectBtn.addEventListener("click", async () => {
+  if (typeof window.ethereum === "undefined") {
+    alert("No wallet found. Please use MetaMask, Trust Wallet, or a Web3 browser.");
     return;
   }
 
-  const { createWeb3Modal, EthereumProvider } = window.w3m;
-  const ethers = window.ethers;
+  try {
+    // Request access
+    await window.ethereum.request({ method: 'eth_requestAccounts' });
 
-  createWeb3Modal({
-    projectId,
-    themeMode: 'light',
-    chains: [{ chainId, rpcUrl, name: "Arbitrum Sepolia" }]
-  });
+    // Init provider and signer
+    provider = new ethers.providers.Web3Provider(window.ethereum);
+    signer = provider.getSigner();
+    userAddress = await signer.getAddress();
 
-  connectBtn.addEventListener("click", async () => {
-    try {
-      const ethereumProvider = new EthereumProvider({
-        projectId,
-        chains: [{ chainId, rpcUrl }]
-      });
+    // Fetch and set contract
+    const res = await fetch("./abi/contractABI.json");
+    const abi = await res.json();
+    contract = new ethers.Contract(contractAddress, abi, signer);
 
-      await ethereumProvider.enable();
+    // Show dashboard
+    homepage.style.display = "none";
+    dashboard.style.display = "block";
 
-      provider = new ethers.providers.Web3Provider(ethereumProvider);
-      signer = provider.getSigner();
-      userAddress = await signer.getAddress();
+    // Load unlock time & user data
+    const rawUnlockTime = await contract.getUnlockTime();
+    unlockTimestamp = Number(rawUnlockTime);
+    startCountdown();
+    await loadUserData();
 
-      const res = await fetch("./abi/contractABI.json");
-      const abi = await res.json();
-      contract = new ethers.Contract(contractAddress, abi, signer);
+  } catch (err) {
+    console.error("❌ Wallet connection failed:", err);
+    alert("Failed to connect wallet.");
+  }
+});
 
-      homepage.style.display = "none";
-      dashboard.style.display = "block";
-
-      const rawUnlockTime = await contract.getUnlockTime();
-      unlockTimestamp = Number(rawUnlockTime);
-
-      startCountdown();
-      await loadUserData();
-    } catch (err) {
-      console.error("❌ Wallet connection failed:", err);
-      alert("Failed to connect wallet.");
-    }
-  });
-};
-
+// === Countdown Timer ===
 function startCountdown() {
   if (!unlockTimestamp) {
     timerEl.textContent = "Invalid unlock time.";
@@ -98,6 +87,7 @@ function startCountdown() {
   }, 1000);
 }
 
+// === Load User & Contract Data ===
 async function loadUserData() {
   try {
     const deposits = await contract.getDeposits(userAddress);
@@ -141,6 +131,7 @@ async function loadUserData() {
   }
 }
 
+// === Handle Deposit ===
 depositForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -163,6 +154,7 @@ depositForm.addEventListener("submit", async (e) => {
   }
 });
 
+// === Handle Withdraw ===
 inlineClaimBtn.addEventListener("click", async () => {
   const deposits = await contract.getDeposits(userAddress);
 
