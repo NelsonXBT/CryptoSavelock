@@ -24,33 +24,16 @@ const vaultBalanceEl = document.getElementById('vaultBalance');
 
 // === Initialize Everything After Page Loads ===
 window.onload = () => {
-  const Web3Modal = window.Web3Modal;
-  const EthereumProvider = window.ethereumProvider;
   const ethers = window.ethers;
-
-  // ✅ Init Web3Modal
-  Web3Modal({
-    projectId,
-    themeMode: 'light',
-    themeVariables: {
-      '--w3m-accent': '#0d9488'
-    },
-    chains: [
-      {
-        chainId,
-        name: 'Arbitrum Sepolia',
-        rpcUrl: 'https://sepolia-rollup.arbitrum.io/rpc'
-      }
-    ]
-  });
-
-
+  const EthereumProvider = window.ethereumProvider;
 
   // ✅ Show Wallet Modal and Connect
   async function showModalAndConnect() {
     try {
+      // 1. Open modal
       window.Web3Modal.openModal();
 
+      // 2. Wait for wallet connection
       const ethereumProvider = new EthereumProvider({
         projectId,
         chains: [{ chainId, rpcUrl: 'https://sepolia-rollup.arbitrum.io/rpc' }]
@@ -58,6 +41,7 @@ window.onload = () => {
 
       await ethereumProvider.enable();
 
+      // 3. Setup ethers
       provider = new ethers.providers.Web3Provider(ethereumProvider);
       signer = provider.getSigner();
       userAddress = await signer.getAddress();
@@ -80,7 +64,7 @@ window.onload = () => {
     }
   }
 
-  // ✅ Countdown Timer
+  // 🕒 Countdown Timer
   function startCountdown() {
     if (!unlockTimestamp) {
       timerEl.textContent = "Invalid unlock time.";
@@ -108,7 +92,7 @@ window.onload = () => {
     }, 1000);
   }
 
-  // ✅ Load Contract & User Data
+  // 🔄 Load Data
   async function loadUserData() {
     try {
       const deposits = await contract.getDeposits(userAddress);
@@ -155,7 +139,7 @@ window.onload = () => {
     }
   }
 
-  // ✅ Deposit Handler
+  // 💸 Deposit
   depositForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -178,7 +162,7 @@ window.onload = () => {
     }
   });
 
-  // ✅ Claim All Unclaimed
+  // 🔓 Claim All
   inlineClaimBtn.addEventListener("click", async () => {
     const deposits = await contract.getDeposits(userAddress);
 
@@ -196,6 +180,6 @@ window.onload = () => {
     await loadUserData();
   });
 
-  // ✅ Hook Wallet Connect
+  // 🟢 App Start
   connectBtn.addEventListener("click", showModalAndConnect);
 };
