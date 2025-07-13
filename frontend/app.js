@@ -3,7 +3,7 @@ let provider, signer, contract, userAddress, unlockTimestamp;
 
 const contractAddress = "0xF020f362CDe86004d94C832596415E082A77e203";
 const projectId = "c3b7d635ca869e04b3759d209a9081eb";
-const chainId = 421614; // Arbitrum Sepolia
+const chainId = 421614;
 
 // === DOM Elements ===
 const connectBtn = document.getElementById('connectBtn');
@@ -24,10 +24,11 @@ const vaultBalanceEl = document.getElementById('vaultBalance');
 
 // === Initialize App AFTER Scripts Load ===
 window.onload = () => {
-  const { createWeb3Modal, EthereumProvider } = window.W3m;
+  const createWeb3Modal = window.Web3Modal;
+  const EthereumProvider = window.ethereumProvider;
   const ethers = window.ethers;
 
-  // ✅ Initialize Web3Modal v2
+  // ✅ Init modal
   createWeb3Modal({
     projectId,
     themeMode: 'light',
@@ -43,10 +44,8 @@ window.onload = () => {
     ]
   });
 
-  // ✅ Wallet Connection Logic
   async function showModalAndConnect() {
     try {
-      // Show modal
       window.Web3Modal.openModal();
 
       const ethereumProvider = new EthereumProvider({
@@ -78,7 +77,6 @@ window.onload = () => {
     }
   }
 
-  // ✅ Countdown Timer
   function startCountdown() {
     if (!unlockTimestamp) {
       timerEl.textContent = "Invalid unlock time.";
@@ -106,7 +104,6 @@ window.onload = () => {
     }, 1000);
   }
 
-  // ✅ Load User & Contract Data
   async function loadUserData() {
     try {
       const deposits = await contract.getDeposits(userAddress);
@@ -153,7 +150,6 @@ window.onload = () => {
     }
   }
 
-  // ✅ Handle Deposit
   depositForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -176,7 +172,6 @@ window.onload = () => {
     }
   });
 
-  // ✅ Claim All Deposits
   inlineClaimBtn.addEventListener("click", async () => {
     const deposits = await contract.getDeposits(userAddress);
 
@@ -194,6 +189,5 @@ window.onload = () => {
     await loadUserData();
   });
 
-  // ✅ Connect Button Hook
   connectBtn.addEventListener("click", showModalAndConnect);
 };
