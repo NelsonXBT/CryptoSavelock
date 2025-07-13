@@ -23,27 +23,32 @@ const totalUsersEl = document.getElementById('totalUsers');
 const vaultBalanceEl = document.getElementById('vaultBalance');
 
 // === Web3Modal Setup ===
-const { EthereumProvider, defaultWagmiConfig, createWeb3Modal } = window.W3m;
+const { createWeb3Modal, EthereumProvider } = window.W3m;
 const ethers = window.ethers;
 
+// ✅ Init Web3Modal (only once)
 createWeb3Modal({
   projectId,
   themeMode: 'light',
   themeVariables: {
-    '--w3m-accent': '#0d9488', // Optional: customize color
+    '--w3m-accent': '#0d9488'
   },
   chains: [
     {
       chainId,
       name: 'Arbitrum Sepolia',
-      rpcUrl: 'https://sepolia-rollup.arbitrum.io/rpc',
+      rpcUrl: 'https://sepolia-rollup.arbitrum.io/rpc'
     }
   ]
 });
 
-// Connect Wallet
+// ✅ Wallet Connect Function
 async function showModalAndConnect() {
   try {
+    // 1. Open modal
+    window.Web3Modal.openModal();
+
+    // 2. Wait for user to choose wallet and connect
     const ethereumProvider = new EthereumProvider({
       projectId,
       chains: [{ chainId, rpcUrl: 'https://sepolia-rollup.arbitrum.io/rpc' }]
@@ -51,6 +56,7 @@ async function showModalAndConnect() {
 
     await ethereumProvider.enable();
 
+    // 3. Setup ethers
     provider = new ethers.providers.Web3Provider(ethereumProvider);
     signer = provider.getSigner();
     userAddress = await signer.getAddress();
@@ -68,12 +74,12 @@ async function showModalAndConnect() {
     startCountdown();
     await loadUserData();
   } catch (err) {
-    console.error("❌ Failed to connect or initialize:", err);
-    alert("Error initializing dApp.");
+    console.error("❌ Wallet connection failed:", err);
+    alert("Failed to connect wallet. Please try again.");
   }
 }
 
-// Countdown Timer
+// 🕒 Countdown Timer
 function startCountdown() {
   if (!unlockTimestamp) {
     timerEl.textContent = "Invalid unlock time.";
@@ -101,7 +107,7 @@ function startCountdown() {
   }, 1000);
 }
 
-// Load User & Contract Data
+// 🔄 Load Data
 async function loadUserData() {
   try {
     const deposits = await contract.getDeposits(userAddress);
@@ -148,7 +154,7 @@ async function loadUserData() {
   }
 }
 
-// Deposit ETH
+// 💸 Deposit
 depositForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -171,7 +177,7 @@ depositForm.addEventListener("submit", async (e) => {
   }
 });
 
-// Claim All
+// 🔓 Claim All
 inlineClaimBtn.addEventListener("click", async () => {
   const deposits = await contract.getDeposits(userAddress);
 
@@ -189,7 +195,7 @@ inlineClaimBtn.addEventListener("click", async () => {
   await loadUserData();
 });
 
-// On Load
+// 🟢 App Start
 window.onload = () => {
   connectBtn.addEventListener("click", showModalAndConnect);
 };
