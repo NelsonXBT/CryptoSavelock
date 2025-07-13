@@ -28,19 +28,20 @@ async function initApp() {
     const abi = await response.json();
 
     // ✅ Setup Web3Modal with WalletConnect
-    web3Modal = new Web3Modal({
-      cacheProvider: false,
-      providerOptions: {
-        walletconnect: {
-          package: WalletConnectProvider,
-          options: {
-            rpc: {
-              421614: "https://sepolia-rollup.arbitrum.io/rpc"
-            }
-          }
+    web3Modal = new window.Web3Modal.default({
+  cacheProvider: false,
+  providerOptions: {
+    walletconnect: {
+      package: WalletConnectProvider,
+      options: {
+        rpc: {
+          421614: "https://sepolia-rollup.arbitrum.io/rpc"
         }
       }
-    });
+    }
+  }
+});
+
 
     const instance = await web3Modal.connect();
     provider = new ethers.providers.Web3Provider(instance);
