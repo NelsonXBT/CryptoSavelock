@@ -7,30 +7,25 @@ document.addEventListener("DOMContentLoaded", () => {
   const rpcUrl = "https://sepolia-rollup.arbitrum.io/rpc";
   const chainId = 421614;
 
-  const abi =  [
-  {
-    "inputs": [],
-    "name": "deposit",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "uint256", "name": "index", "type": "uint256" }
-    ],
-    "name": "claim",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "user", "type": "address" }
-    ],
-    "name": "getDeposits",
-    "outputs": [
-      {
+  const abi = [
+    {
+      "inputs": [],
+      "name": "deposit",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "uint256", "name": "index", "type": "uint256" }],
+      "name": "claim",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
+      "name": "getDeposits",
+      "outputs": [{
         "components": [
           { "internalType": "uint256", "name": "amount", "type": "uint256" },
           { "internalType": "uint256", "name": "timestamp", "type": "uint256" },
@@ -39,51 +34,39 @@ document.addEventListener("DOMContentLoaded", () => {
         "internalType": "struct TimeLockVault.Deposit[]",
         "name": "",
         "type": "tuple[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getUnlockTime",
-    "outputs": [
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "user", "type": "address" }
-    ],
-    "name": "getTotalDeposited",
-    "outputs": [
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getStartTime",
-    "outputs": [
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getUserCount",
-    "outputs": [
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  }
-];
-
+      }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getUnlockTime",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
+      "name": "getTotalDeposited",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getStartTime",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getUserCount",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ];
 
   const connectBtn = document.getElementById("connectBtn");
   const homepage = document.getElementById("homepage");
@@ -103,25 +86,48 @@ document.addEventListener("DOMContentLoaded", () => {
 
   connectBtn.addEventListener("click", async () => {
     try {
-      console.log("🟡 Trying injected wallet...");
-      if (window.ethereum) {
-        await window.ethereum.request({ method: "eth_requestAccounts" });
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-      } else {
-        console.log("🟠 Injected wallet not found. Trying WalletConnect...");
-
-        const WalletConnectProvider = window.WalletConnectProvider.default;
-        const wc = new WalletConnectProvider({
-          rpc: {
-            [chainId]: rpcUrl,
-          },
-          chainId: chainId,
-        });
-
-        await wc.enable();
-        provider = new ethers.providers.Web3Provider(wc);
+      console.log("🟡 Checking for injected wallet...");
+      if (!window.ethereum) {
+        alert("Please use a browser with an Ethereum wallet like MetaMask.");
+        return;
       }
 
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+      const { chainId: currentChainIdHex } = await provider.getNetwork();
+      const currentChainId = parseInt(currentChainIdHex);
+
+      // ✅ Switch or add Arbitrum Sepolia if not already on it
+      if (currentChainId !== chainId) {
+        try {
+          await window.ethereum.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: "0x" + chainId.toString(16) }]
+          });
+        } catch (switchError) {
+          // If not added to wallet, try to add it
+          if (switchError.code === 4902) {
+            await window.ethereum.request({
+              method: "wallet_addEthereumChain",
+              params: [{
+                chainId: "0x" + chainId.toString(16),
+                chainName: "Arbitrum Sepolia",
+                rpcUrls: [rpcUrl],
+                nativeCurrency: {
+                  name: "Ethereum",
+                  symbol: "ETH",
+                  decimals: 18
+                },
+                blockExplorerUrls: ["https://sepolia.arbiscan.io"]
+              }]
+            });
+          } else {
+            alert("Please switch to the Arbitrum Sepolia network.");
+            return;
+          }
+        }
+      }
+
+      await window.ethereum.request({ method: "eth_requestAccounts" });
       signer = provider.getSigner();
       userAddress = await signer.getAddress();
       contract = new ethers.Contract(contractAddress, abi, signer);
@@ -219,7 +225,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const amount = parseFloat(depositAmount.value);
-    if (!amount || amount <= 0) return;
+    if (isNaN(amount) || amount <= 0) {
+      alert("Please enter a valid amount greater than 0.");
+      return;
+    }
 
     try {
       const tx = await contract.deposit({ value: ethers.utils.parseEther(amount.toString()) });
