@@ -1,3 +1,6 @@
+let provider, signer, contract, userAddress, unlockTimestamp;
+let web3Modal;
+
 const connectBtn = document.getElementById('connectBtn');
 const homepage = document.getElementById('homepage');
 const dashboard = document.getElementById('dashboard');
@@ -18,95 +21,34 @@ const vaultBalanceEl = document.getElementById('vaultBalance');
 
 const contractAddress = "0xF020f362CDe86004d94C832596415E082A77e203";
 
-const abi = [
-  {
-    "inputs": [],
-    "name": "deposit",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "uint256", "name": "index", "type": "uint256" }
-    ],
-    "name": "claim",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "user", "type": "address" }
-    ],
-    "name": "getDeposits",
-    "outputs": [
-      {
-        "components": [
-          { "internalType": "uint256", "name": "amount", "type": "uint256" },
-          { "internalType": "uint256", "name": "timestamp", "type": "uint256" },
-          { "internalType": "bool", "name": "claimed", "type": "bool" }
-        ],
-        "internalType": "struct TimeLockVault.Deposit[]",
-        "name": "",
-        "type": "tuple[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getUnlockTime",
-    "outputs": [
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "user", "type": "address" }
-    ],
-    "name": "getTotalDeposited",
-    "outputs": [
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getStartTime",
-    "outputs": [
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getUserCount",
-    "outputs": [
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  }
-];
-
-let provider, signer, contract, userAddress, unlockTimestamp;
-
 async function initApp() {
   try {
-    if (typeof window.ethereum === 'undefined') {
-      alert("No wallet detected. Please install MetaMask.");
-      return;
-    }
+    const response = await fetch("frontend/abi/contractABI.json");
+    const abi = await response.json();
 
-    provider = new ethers.BrowserProvider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    signer = await provider.getSigner();
+    const walletConnectProvider = new window.WalletConnectProvider.default({
+      rpc: {
+        421614: "https://sepolia-rollup.arbitrum.io/rpc" // Arbitrum Sepolia
+      }
+    });
+
+    web3Modal = new window.Web3Modal.default({
+      cacheProvider: false,
+      providerOptions: {
+        walletconnect: {
+          package: window.WalletConnectProvider.default,
+          options: {
+            rpc: {
+              421614: "https://sepolia-rollup.arbitrum.io/rpc"
+            }
+          }
+        }
+      }
+    });
+
+    const instance = await web3Modal.connect();
+    provider = new ethers.providers.Web3Provider(instance);
+    signer = provider.getSigner();
     userAddress = await signer.getAddress();
 
     contract = new ethers.Contract(contractAddress, abi, signer);
@@ -138,11 +80,10 @@ function startCountdown() {
     if (diff <= 0) {
       timerEl.textContent = "Unlocked!";
       clearInterval(interval);
-
-      if (depositForm) depositForm.style.display = 'none';
-      if (depositHeading) depositHeading.textContent = "Savelock Period has Ended";
-      if (afterUnlockText) afterUnlockText.style.display = "block";
-      if (inlineClaimWrapper) inlineClaimWrapper.style.display = "block";
+      depositForm.style.display = 'none';
+      depositHeading.textContent = "Savelock Period has Ended";
+      afterUnlockText.style.display = "block";
+      inlineClaimWrapper.style.display = "block";
     } else {
       const d = Math.floor(diff / (1000 * 60 * 60 * 24));
       const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
@@ -157,24 +98,17 @@ async function loadUserData() {
   try {
     const deposits = await contract.getDeposits(userAddress);
     const total = await contract.getTotalDeposited(userAddress);
-    totalDepositedEl.textContent = `${ethers.formatEther(total)} ETH`;
+    totalDepositedEl.textContent = `${ethers.utils.formatEther(total)} ETH`;
 
     historyTableBody.innerHTML = '';
-
-    deposits.forEach((d, index) => {
+    deposits.forEach((d) => {
       const row = document.createElement('tr');
-
       const isUnlocked = Date.now() / 1000 >= unlockTimestamp;
-      const status = d.claimed
-        ? '✅ Claimed'
-        : (isUnlocked ? '🔓 Claimable' : '🔒 Locked');
-
+      const status = d.claimed ? '✅ Claimed' : (isUnlocked ? '🔓 Claimable' : '🔒 Locked');
       row.innerHTML = `
-        <td>${ethers.formatEther(d.amount)} ETH</td>
+        <td>${ethers.utils.formatEther(d.amount)} ETH</td>
         <td>${new Date(Number(d.timestamp) * 1000).toLocaleString()}</td>
-        <td>${status}</td>
-      `;
-
+        <td>${status}</td>`;
       historyTableBody.appendChild(row);
     });
   } catch (err) {
@@ -183,8 +117,7 @@ async function loadUserData() {
 
   try {
     const contractStartTime = await contract.getStartTime();
-    const dateStr = new Date(Number(contractStartTime) * 1000).toLocaleString();
-    startDateEl.textContent = dateStr;
+    startDateEl.textContent = new Date(Number(contractStartTime) * 1000).toLocaleString();
   } catch (err) {
     console.error("⚠️ getStartTime() failed:", err);
     startDateEl.textContent = "N/A";
@@ -200,7 +133,7 @@ async function loadUserData() {
 
   try {
     const vaultBal = await provider.getBalance(contractAddress);
-    vaultBalanceEl.textContent = `${ethers.formatEther(vaultBal)} ETH`;
+    vaultBalanceEl.textContent = `${ethers.utils.formatEther(vaultBal)} ETH`;
   } catch (err) {
     console.error("⚠️ getBalance() failed:", err);
     vaultBalanceEl.textContent = "N/A";
@@ -219,7 +152,7 @@ depositForm.addEventListener('submit', async (e) => {
   if (!amount || amount <= 0) return;
 
   try {
-    const tx = await contract.deposit({ value: ethers.parseEther(amount.toString()) });
+    const tx = await contract.deposit({ value: ethers.utils.parseEther(amount.toString()) });
     await tx.wait();
     depositAmount.value = '';
     await loadUserData();
@@ -230,10 +163,6 @@ depositForm.addEventListener('submit', async (e) => {
 });
 
 inlineClaimBtn.addEventListener('click', async () => {
-  await handleClaim();
-});
-
-async function handleClaim() {
   const deposits = await contract.getDeposits(userAddress);
 
   for (let i = 0; i < deposits.length; i++) {
@@ -248,12 +177,8 @@ async function handleClaim() {
   }
 
   await loadUserData();
-}
+});
 
 window.onload = () => {
-  if (connectBtn) {
-    connectBtn.addEventListener('click', initApp);
-  }
+  connectBtn.addEventListener('click', initApp);
 };
-
-window.initApp = initApp;
