@@ -1,3 +1,5 @@
+/* global ethers, Web3Modal, WalletConnectProvider */
+
 let provider, signer, contract, userAddress, unlockTimestamp;
 let web3Modal;
 
@@ -14,7 +16,6 @@ const afterUnlockText = document.getElementById('claimNote');
 const inlineClaimWrapper = document.getElementById('claimOnlyBtnWrapper');
 const inlineClaimBtn = document.getElementById('claimOnlyBtn');
 
-// 📌 New elements for extra stats
 const startDateEl = document.getElementById('startDate');
 const totalUsersEl = document.getElementById('totalUsers');
 const vaultBalanceEl = document.getElementById('vaultBalance');
@@ -23,20 +24,15 @@ const contractAddress = "0xF020f362CDe86004d94C832596415E082A77e203";
 
 async function initApp() {
   try {
-    const response = await fetch("frontend/abi/contractABI.json");
+    const response = await fetch("abi/contractABI.json");
     const abi = await response.json();
 
-    const walletConnectProvider = new window.WalletConnectProvider.default({
-      rpc: {
-        421614: "https://sepolia-rollup.arbitrum.io/rpc" // Arbitrum Sepolia
-      }
-    });
-
-    web3Modal = new window.Web3Modal.default({
+    // ✅ Setup Web3Modal with WalletConnect
+    web3Modal = new Web3Modal({
       cacheProvider: false,
       providerOptions: {
         walletconnect: {
-          package: window.WalletConnectProvider.default,
+          package: WalletConnectProvider,
           options: {
             rpc: {
               421614: "https://sepolia-rollup.arbitrum.io/rpc"
