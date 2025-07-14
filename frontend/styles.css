@@ -316,10 +316,10 @@ input[type="number"]::placeholder {
   transform: translate(-50%, -50%);
   min-width: 250px;
   max-width: 90%;
-  background: #dcdcdc;
-  color:  rgba(22, 22, 22, 0.95);
+  background: #333;
+  color:  rgba(255, 255, 255, 0.95);
   padding: 18px 24px;
-  border: 2px solid #dcdcdc;
+  border: 2px solid #333;
   border-radius: 14px;
   font-size: 18px;
   font-weight: 500; /* was normal (400) */
