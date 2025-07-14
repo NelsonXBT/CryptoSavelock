@@ -48,31 +48,33 @@ document.addEventListener("DOMContentLoaded", () => {
   const totalUsersEl = document.getElementById('totalUsers');
   const vaultBalanceEl = document.getElementById('vaultBalance');
 
-  // 🔁 Reload once if user switches network manually
+  // Reload if user switches network manually
   if (window.ethereum) {
     window.ethereum.on("chainChanged", () => {
       if (!hasReloaded) {
         hasReloaded = true;
-        showStatus("Network switched. Reloading...", 2000);
-        setTimeout(() => window.location.reload(), 2000);
+        showStatus("Network changed. Reloading...", 2500);
+        setTimeout(() => window.location.reload(), 2500);
       }
     });
   }
 
-  function showStatus(message, duration = 3000) {
+  function showStatus(message, duration = 5000) {
     let statusDiv = document.getElementById("statusMessage");
     if (!statusDiv) {
       statusDiv = document.createElement("div");
       statusDiv.id = "statusMessage";
       statusDiv.style.position = "fixed";
-      statusDiv.style.top = "20px";
+      statusDiv.style.top = "50%";
       statusDiv.style.left = "50%";
-      statusDiv.style.transform = "translateX(-50%)";
-      statusDiv.style.backgroundColor = "#111";
+      statusDiv.style.transform = "translate(-50%, -50%)";
+      statusDiv.style.backgroundColor = "#222";
       statusDiv.style.color = "#fff";
-      statusDiv.style.padding = "12px 20px";
+      statusDiv.style.padding = "16px 24px";
       statusDiv.style.borderRadius = "10px";
       statusDiv.style.boxShadow = "0 2px 10px rgba(0,0,0,0.3)";
+      statusDiv.style.fontSize = "16px";
+      statusDiv.style.textAlign = "center";
       statusDiv.style.zIndex = "9999";
       document.body.appendChild(statusDiv);
     }
@@ -86,13 +88,12 @@ document.addEventListener("DOMContentLoaded", () => {
   connectBtn.addEventListener("click", async () => {
     try {
       if (!window.ethereum) {
-        alert("Please use a browser with MetaMask or a wallet extension.");
+        alert("Please use a browser with an Ethereum wallet like MetaMask.");
         return;
       }
 
       provider = new ethers.providers.Web3Provider(window.ethereum);
-      const network = await provider.getNetwork();
-      const currentChainId = network.chainId;
+      const { chainId: currentChainId } = await provider.getNetwork();
 
       if (currentChainId !== chainId) {
         try {
@@ -108,7 +109,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 chainId: "0x" + chainId.toString(16),
                 chainName: "Arbitrum Sepolia",
                 rpcUrls: [rpcUrl],
-                nativeCurrency: { name: "Ethereum", symbol: "ETH", decimals: 18 },
+                nativeCurrency: {
+                  name: "Ethereum",
+                  symbol: "ETH",
+                  decimals: 18
+                },
                 blockExplorerUrls: ["https://sepolia.arbiscan.io"]
               }]
             });
@@ -118,9 +123,8 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
 
-        showStatus("Switching network... syncing");
-        await new Promise(resolve => setTimeout(resolve, 1200));
-        provider = new ethers.providers.Web3Provider(window.ethereum); // reinit
+        showStatus("Network changed successfully. Click Connect Wallet now", 5000);
+        return; // Stop here. User will now click Connect manually
       }
 
       await provider.send("eth_requestAccounts", []);
@@ -130,17 +134,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       homepage.style.display = "none";
       dashboard.style.display = "block";
-      showStatus("Wallet connected successfully", 2500);
+
+      showStatus("Wallet connected", 2000);
 
       const rawUnlockTime = await contract.getUnlockTime();
       unlockTimestamp = Number(rawUnlockTime);
       startCountdown();
       await loadUserData();
     } catch (err) {
-      if (err.code === "NETWORK_ERROR") {
-        console.warn("⚠️ Wallet/network not ready yet. Please try again.");
-        return;
-      }
       console.error("❌ Wallet connection failed:", err);
       alert("Wallet connection failed: " + (err.message || "Unknown error"));
     }
