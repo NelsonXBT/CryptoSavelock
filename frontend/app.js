@@ -2,69 +2,54 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log("✅ DOM ready");
 
   let provider, signer, contract, userAddress, unlockTimestamp;
+  let hasReloaded = false;
 
   const contractAddress = "0xF020f362CDe86004d94C832596415E082A77e203";
   const rpcUrl = "https://sepolia-rollup.arbitrum.io/rpc";
   const chainId = 421614;
 
-  const abi = [ /* ✅ Your ABI exactly as before */ 
+  const abi = [ /* your existing ABI goes here */ 
     {
-      "inputs": [],
-      "name": "deposit",
-      "outputs": [],
-      "stateMutability": "payable",
-      "type": "function"
+      "inputs": [], "name": "deposit", "outputs": [],
+      "stateMutability": "payable", "type": "function"
     },
     {
       "inputs": [{ "internalType": "uint256", "name": "index", "type": "uint256" }],
-      "name": "claim",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
+      "name": "claim", "outputs": [], "stateMutability": "nonpayable", "type": "function"
     },
     {
       "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
-      "name": "getDeposits",
-      "outputs": [{
+      "name": "getDeposits", "outputs": [{
         "components": [
           { "internalType": "uint256", "name": "amount", "type": "uint256" },
           { "internalType": "uint256", "name": "timestamp", "type": "uint256" },
           { "internalType": "bool", "name": "claimed", "type": "bool" }
         ],
         "internalType": "struct TimeLockVault.Deposit[]",
-        "name": "",
-        "type": "tuple[]"
+        "name": "", "type": "tuple[]"
       }],
-      "stateMutability": "view",
-      "type": "function"
+      "stateMutability": "view", "type": "function"
     },
     {
-      "inputs": [],
-      "name": "getUnlockTime",
+      "inputs": [], "name": "getUnlockTime",
       "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-      "stateMutability": "view",
-      "type": "function"
+      "stateMutability": "view", "type": "function"
     },
     {
       "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
       "name": "getTotalDeposited",
       "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-      "stateMutability": "view",
-      "type": "function"
+      "stateMutability": "view", "type": "function"
     },
     {
-      "inputs": [],
-      "name": "getStartTime",
+      "inputs": [], "name": "getStartTime",
       "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-      "stateMutability": "view",
-      "type": "function"
+      "stateMutability": "view", "type": "function"
     },
     {
-      "inputs": [],
-      "name": "getUserCount",
+      "inputs": [], "name": "getUserCount",
       "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-      "stateMutability": "view",
-      "type": "function"
+      "stateMutability": "view", "type": "function"
     }
   ];
 
@@ -83,6 +68,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const startDateEl = document.getElementById('startDate');
   const totalUsersEl = document.getElementById('totalUsers');
   const vaultBalanceEl = document.getElementById('vaultBalance');
+
+  // 🔁 Auto reload if user switches network manually
+  if (window.ethereum) {
+    window.ethereum.on("chainChanged", () => {
+      if (!hasReloaded) {
+        hasReloaded = true;
+        showStatus("Network switched. Reloading to sync...", 2500);
+        setTimeout(() => window.location.reload(), 2500);
+      }
+    });
+  }
 
   function showStatus(message, duration = 3000) {
     let statusDiv = document.getElementById("statusMessage");
@@ -116,8 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       provider = new ethers.providers.Web3Provider(window.ethereum);
-      const network = await provider.getNetwork();
-      const currentChainId = network.chainId;
+      const { chainId: currentChainId } = await provider.getNetwork();
 
       if (currentChainId !== chainId) {
         try {
@@ -147,17 +142,20 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
 
-        await new Promise(resolve => setTimeout(resolve, 700));
+        showStatus("Switching network... syncing wallet");
+        await new Promise(resolve => setTimeout(resolve, 1200));
         provider = new ethers.providers.Web3Provider(window.ethereum);
       }
 
-      await window.ethereum.request({ method: "eth_requestAccounts" });
+      await provider.send("eth_requestAccounts", []);
       signer = provider.getSigner();
       userAddress = await signer.getAddress();
       contract = new ethers.Contract(contractAddress, abi, signer);
 
       homepage.style.display = "none";
       dashboard.style.display = "block";
+
+      showStatus("Wallet connected successfully", 3000);
 
       const rawUnlockTime = await contract.getUnlockTime();
       unlockTimestamp = Number(rawUnlockTime);
@@ -166,7 +164,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     } catch (err) {
       if (err.code === "NETWORK_ERROR") {
-        console.warn("⚠️ Network changed too fast. Please try again.");
+        console.warn("⚠️ Network changed too fast. Please click Connect again.");
         return;
       }
       console.error("❌ Wallet connection failed:", err);
