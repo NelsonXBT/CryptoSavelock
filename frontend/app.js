@@ -8,18 +8,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const rpcUrl = "https://sepolia-rollup.arbitrum.io/rpc";
   const chainId = 421614;
 
-  const abi = [ /* your existing ABI goes here */ 
-    {
-      "inputs": [], "name": "deposit", "outputs": [],
-      "stateMutability": "payable", "type": "function"
-    },
-    {
-      "inputs": [{ "internalType": "uint256", "name": "index", "type": "uint256" }],
-      "name": "claim", "outputs": [], "stateMutability": "nonpayable", "type": "function"
-    },
+  const abi = [
+    { "inputs": [], "name": "deposit", "outputs": [], "stateMutability": "payable", "type": "function" },
+    { "inputs": [{ "internalType": "uint256", "name": "index", "type": "uint256" }], "name": "claim", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
     {
       "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
-      "name": "getDeposits", "outputs": [{
+      "name": "getDeposits",
+      "outputs": [{
         "components": [
           { "internalType": "uint256", "name": "amount", "type": "uint256" },
           { "internalType": "uint256", "name": "timestamp", "type": "uint256" },
@@ -28,29 +23,13 @@ document.addEventListener("DOMContentLoaded", () => {
         "internalType": "struct TimeLockVault.Deposit[]",
         "name": "", "type": "tuple[]"
       }],
-      "stateMutability": "view", "type": "function"
+      "stateMutability": "view",
+      "type": "function"
     },
-    {
-      "inputs": [], "name": "getUnlockTime",
-      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-      "stateMutability": "view", "type": "function"
-    },
-    {
-      "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
-      "name": "getTotalDeposited",
-      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-      "stateMutability": "view", "type": "function"
-    },
-    {
-      "inputs": [], "name": "getStartTime",
-      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-      "stateMutability": "view", "type": "function"
-    },
-    {
-      "inputs": [], "name": "getUserCount",
-      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-      "stateMutability": "view", "type": "function"
-    }
+    { "inputs": [], "name": "getUnlockTime", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
+    { "inputs": [{ "internalType": "address", "name": "user", "type": "address" }], "name": "getTotalDeposited", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
+    { "inputs": [], "name": "getStartTime", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
+    { "inputs": [], "name": "getUserCount", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }
   ];
 
   const connectBtn = document.getElementById("connectBtn");
@@ -69,13 +48,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const totalUsersEl = document.getElementById('totalUsers');
   const vaultBalanceEl = document.getElementById('vaultBalance');
 
-  // 🔁 Auto reload if user switches network manually
+  // 🔁 Reload once if user switches network manually
   if (window.ethereum) {
     window.ethereum.on("chainChanged", () => {
       if (!hasReloaded) {
         hasReloaded = true;
-        showStatus("Network switched. Reloading to sync...", 2500);
-        setTimeout(() => window.location.reload(), 2500);
+        showStatus("Network switched. Reloading...", 2000);
+        setTimeout(() => window.location.reload(), 2000);
       }
     });
   }
@@ -107,12 +86,13 @@ document.addEventListener("DOMContentLoaded", () => {
   connectBtn.addEventListener("click", async () => {
     try {
       if (!window.ethereum) {
-        alert("Please use a browser with an Ethereum wallet like MetaMask.");
+        alert("Please use a browser with MetaMask or a wallet extension.");
         return;
       }
 
       provider = new ethers.providers.Web3Provider(window.ethereum);
-      const { chainId: currentChainId } = await provider.getNetwork();
+      const network = await provider.getNetwork();
+      const currentChainId = network.chainId;
 
       if (currentChainId !== chainId) {
         try {
@@ -128,11 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 chainId: "0x" + chainId.toString(16),
                 chainName: "Arbitrum Sepolia",
                 rpcUrls: [rpcUrl],
-                nativeCurrency: {
-                  name: "Ethereum",
-                  symbol: "ETH",
-                  decimals: 18
-                },
+                nativeCurrency: { name: "Ethereum", symbol: "ETH", decimals: 18 },
                 blockExplorerUrls: ["https://sepolia.arbiscan.io"]
               }]
             });
@@ -142,9 +118,9 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
 
-        showStatus("Switching network... syncing wallet");
+        showStatus("Switching network... syncing");
         await new Promise(resolve => setTimeout(resolve, 1200));
-        provider = new ethers.providers.Web3Provider(window.ethereum);
+        provider = new ethers.providers.Web3Provider(window.ethereum); // reinit
       }
 
       await provider.send("eth_requestAccounts", []);
@@ -154,17 +130,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       homepage.style.display = "none";
       dashboard.style.display = "block";
-
-      showStatus("Wallet connected successfully", 3000);
+      showStatus("Wallet connected successfully", 2500);
 
       const rawUnlockTime = await contract.getUnlockTime();
       unlockTimestamp = Number(rawUnlockTime);
       startCountdown();
       await loadUserData();
-
     } catch (err) {
       if (err.code === "NETWORK_ERROR") {
-        console.warn("⚠️ Network changed too fast. Please click Connect again.");
+        console.warn("⚠️ Wallet/network not ready yet. Please try again.");
         return;
       }
       console.error("❌ Wallet connection failed:", err);
