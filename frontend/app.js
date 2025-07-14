@@ -2,15 +2,25 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log("✅ DOM ready");
 
   let provider, signer, contract, userAddress, unlockTimestamp;
-  let hasReloaded = false;
-
   const contractAddress = "0xF020f362CDe86004d94C832596415E082A77e203";
   const rpcUrl = "https://sepolia-rollup.arbitrum.io/rpc";
   const chainId = 421614;
 
   const abi = [
-    { "inputs": [], "name": "deposit", "outputs": [], "stateMutability": "payable", "type": "function" },
-    { "inputs": [{ "internalType": "uint256", "name": "index", "type": "uint256" }], "name": "claim", "outputs": [], "stateMutability": "nonpayable", "type": "function" },
+    {
+      "inputs": [],
+      "name": "deposit",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "uint256", "name": "index", "type": "uint256" }],
+      "name": "claim",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
     {
       "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
       "name": "getDeposits",
@@ -21,15 +31,40 @@ document.addEventListener("DOMContentLoaded", () => {
           { "internalType": "bool", "name": "claimed", "type": "bool" }
         ],
         "internalType": "struct TimeLockVault.Deposit[]",
-        "name": "", "type": "tuple[]"
+        "name": "",
+        "type": "tuple[]"
       }],
       "stateMutability": "view",
       "type": "function"
     },
-    { "inputs": [], "name": "getUnlockTime", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
-    { "inputs": [{ "internalType": "address", "name": "user", "type": "address" }], "name": "getTotalDeposited", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
-    { "inputs": [], "name": "getStartTime", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" },
-    { "inputs": [], "name": "getUserCount", "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }], "stateMutability": "view", "type": "function" }
+    {
+      "inputs": [],
+      "name": "getUnlockTime",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
+      "name": "getTotalDeposited",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getStartTime",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getUserCount",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    }
   ];
 
   const connectBtn = document.getElementById("connectBtn");
@@ -48,17 +83,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const totalUsersEl = document.getElementById('totalUsers');
   const vaultBalanceEl = document.getElementById('vaultBalance');
 
-  // Reload if user switches network manually
-  if (window.ethereum) {
-    window.ethereum.on("chainChanged", () => {
-      if (!hasReloaded) {
-        hasReloaded = true;
-        showStatus("Network changed. Reloading...", 2500);
-        setTimeout(() => window.location.reload(), 2500);
-      }
-    });
-  }
-
   function showStatus(message, duration = 5000) {
     let statusDiv = document.getElementById("statusMessage");
     if (!statusDiv) {
@@ -68,14 +92,13 @@ document.addEventListener("DOMContentLoaded", () => {
       statusDiv.style.top = "50%";
       statusDiv.style.left = "50%";
       statusDiv.style.transform = "translate(-50%, -50%)";
-      statusDiv.style.backgroundColor = "#222";
+      statusDiv.style.backgroundColor = "#111";
       statusDiv.style.color = "#fff";
-      statusDiv.style.padding = "16px 24px";
+      statusDiv.style.padding = "14px 25px";
       statusDiv.style.borderRadius = "10px";
-      statusDiv.style.boxShadow = "0 2px 10px rgba(0,0,0,0.3)";
-      statusDiv.style.fontSize = "16px";
-      statusDiv.style.textAlign = "center";
+      statusDiv.style.boxShadow = "0 4px 20px rgba(0,0,0,0.4)";
       statusDiv.style.zIndex = "9999";
+      statusDiv.style.fontSize = "16px";
       document.body.appendChild(statusDiv);
     }
     statusDiv.textContent = message;
@@ -101,6 +124,8 @@ document.addEventListener("DOMContentLoaded", () => {
             method: "wallet_switchEthereumChain",
             params: [{ chainId: "0x" + chainId.toString(16) }]
           });
+          showStatus("Network changed successfully. Click Connect Wallet now", 5000);
+          return;
         } catch (switchError) {
           if (switchError.code === 4902) {
             await window.ethereum.request({
@@ -109,22 +134,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 chainId: "0x" + chainId.toString(16),
                 chainName: "Arbitrum Sepolia",
                 rpcUrls: [rpcUrl],
-                nativeCurrency: {
-                  name: "Ethereum",
-                  symbol: "ETH",
-                  decimals: 18
-                },
+                nativeCurrency: { name: "Ethereum", symbol: "ETH", decimals: 18 },
                 blockExplorerUrls: ["https://sepolia.arbiscan.io"]
               }]
             });
+            showStatus("Network added successfully. Click Connect Wallet now", 5000);
+            return;
           } else {
             alert("Please switch to the Arbitrum Sepolia network.");
             return;
           }
         }
-
-        showStatus("Network changed successfully. Click Connect Wallet now", 5000);
-        return; // Stop here. User will now click Connect manually
       }
 
       await provider.send("eth_requestAccounts", []);
@@ -134,8 +154,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       homepage.style.display = "none";
       dashboard.style.display = "block";
-
-      showStatus("Wallet connected", 2000);
 
       const rawUnlockTime = await contract.getUnlockTime();
       unlockTimestamp = Number(rawUnlockTime);
