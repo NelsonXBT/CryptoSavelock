@@ -316,8 +316,8 @@ input[type="number"]::placeholder {
   transform: translate(-50%, -50%);
   min-width: 250px;
   max-width: 90%;
-  background: rgba(22, 22, 22, 0.95);
-  color: #ffffff;
+  background: #7e7d7c;
+  color:  rgba(22, 22, 22, 0.95);
   padding: 18px 24px;
   border: 2px solid #7e7d7c;
   border-radius: 14px;
