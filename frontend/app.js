@@ -8,24 +8,29 @@ document.addEventListener("DOMContentLoaded", () => {
   const chainId = 421614;
 
   const abi = [
-    {
-      "inputs": [],
-      "name": "deposit",
-      "outputs": [],
-      "stateMutability": "payable",
-      "type": "function"
-    },
-    {
-      "inputs": [{ "internalType": "uint256", "name": "index", "type": "uint256" }],
-      "name": "claim",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
-      "name": "getDeposits",
-      "outputs": [{
+  {
+    "inputs": [],
+    "name": "deposit",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "index", "type": "uint256" }
+    ],
+    "name": "claim",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "user", "type": "address" }
+    ],
+    "name": "getDeposits",
+    "outputs": [
+      {
         "components": [
           { "internalType": "uint256", "name": "amount", "type": "uint256" },
           { "internalType": "uint256", "name": "timestamp", "type": "uint256" },
@@ -34,39 +39,50 @@ document.addEventListener("DOMContentLoaded", () => {
         "internalType": "struct TimeLockVault.Deposit[]",
         "name": "",
         "type": "tuple[]"
-      }],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getUnlockTime",
-      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
-      "name": "getTotalDeposited",
-      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getStartTime",
-      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getUserCount",
-      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-      "stateMutability": "view",
-      "type": "function"
-    }
-  ];
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getUnlockTime",
+    "outputs": [
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "user", "type": "address" }
+    ],
+    "name": "getTotalDeposited",
+    "outputs": [
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getStartTime",
+    "outputs": [
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getUserCount",
+    "outputs": [
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
 
   const connectBtn = document.getElementById("connectBtn");
   const homepage = document.getElementById("homepage");
@@ -116,8 +132,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       provider = new ethers.providers.Web3Provider(window.ethereum);
-      const { chainId: currentChainIdHex } = await provider.getNetwork();
-      const currentChainId = parseInt(currentChainIdHex);
+      const network = await provider.getNetwork();
+      const currentChainId = network.chainId;
 
       if (currentChainId !== chainId) {
         try {
@@ -146,8 +162,12 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
           }
         }
+
+        // Silent retry after network change
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
 
+      provider = new ethers.providers.Web3Provider(window.ethereum);
       await window.ethereum.request({ method: "eth_requestAccounts" });
       signer = provider.getSigner();
       userAddress = await signer.getAddress();
@@ -160,7 +180,12 @@ document.addEventListener("DOMContentLoaded", () => {
       unlockTimestamp = Number(rawUnlockTime);
       startCountdown();
       await loadUserData();
+
     } catch (err) {
+      if (err.code === "NETWORK_ERROR") {
+        console.warn("⚠️ Network changed too fast. Retry by clicking connect again.");
+        return;
+      }
       console.error("❌ Wallet connection failed:", err);
       alert("Wallet connection failed: " + (err.message || "Unknown error"));
     }
@@ -200,10 +225,10 @@ document.addEventListener("DOMContentLoaded", () => {
       totalDepositedEl.textContent = `${ethers.utils.formatEther(total)} ETH`;
 
       historyTableBody.innerHTML = '';
-      deposits.forEach((d) => {
-        const row = document.createElement('tr');
+      deposits.forEach((d, i) => {
         const isUnlocked = Date.now() / 1000 >= unlockTimestamp;
         const status = d.claimed ? '✅ Claimed' : (isUnlocked ? '🔓 Claimable' : '🔒 Locked');
+        const row = document.createElement('tr');
         row.innerHTML = `
           <td>${ethers.utils.formatEther(d.amount)} ETH</td>
           <td>${new Date(Number(d.timestamp) * 1000).toLocaleString()}</td>
