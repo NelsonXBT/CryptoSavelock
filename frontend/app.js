@@ -7,30 +7,25 @@ document.addEventListener("DOMContentLoaded", () => {
   const rpcUrl = "https://sepolia-rollup.arbitrum.io/rpc";
   const chainId = 421614;
 
-  const abi = [
-  {
-    "inputs": [],
-    "name": "deposit",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "uint256", "name": "index", "type": "uint256" }
-    ],
-    "name": "claim",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "user", "type": "address" }
-    ],
-    "name": "getDeposits",
-    "outputs": [
-      {
+  const abi = [ /* ✅ Your ABI exactly as before */ 
+    {
+      "inputs": [],
+      "name": "deposit",
+      "outputs": [],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "uint256", "name": "index", "type": "uint256" }],
+      "name": "claim",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
+      "name": "getDeposits",
+      "outputs": [{
         "components": [
           { "internalType": "uint256", "name": "amount", "type": "uint256" },
           { "internalType": "uint256", "name": "timestamp", "type": "uint256" },
@@ -39,50 +34,39 @@ document.addEventListener("DOMContentLoaded", () => {
         "internalType": "struct TimeLockVault.Deposit[]",
         "name": "",
         "type": "tuple[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getUnlockTime",
-    "outputs": [
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      { "internalType": "address", "name": "user", "type": "address" }
-    ],
-    "name": "getTotalDeposited",
-    "outputs": [
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getStartTime",
-    "outputs": [
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getUserCount",
-    "outputs": [
-      { "internalType": "uint256", "name": "", "type": "uint256" }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  }
-];
+      }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getUnlockTime",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
+      "name": "getTotalDeposited",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getStartTime",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getUserCount",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ];
 
   const connectBtn = document.getElementById("connectBtn");
   const homepage = document.getElementById("homepage");
@@ -163,11 +147,10 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         }
 
-        // Silent retry after network change
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 700));
+        provider = new ethers.providers.Web3Provider(window.ethereum);
       }
 
-      provider = new ethers.providers.Web3Provider(window.ethereum);
       await window.ethereum.request({ method: "eth_requestAccounts" });
       signer = provider.getSigner();
       userAddress = await signer.getAddress();
@@ -183,7 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     } catch (err) {
       if (err.code === "NETWORK_ERROR") {
-        console.warn("⚠️ Network changed too fast. Retry by clicking connect again.");
+        console.warn("⚠️ Network changed too fast. Please try again.");
         return;
       }
       console.error("❌ Wallet connection failed:", err);
