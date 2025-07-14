@@ -24,7 +24,9 @@ h1 {
 }
 
 p {
-  font-weight: 400;
+  font-weight: 500; /* was normal (400) */
+  line-height: 1.6;
+  font-family: 'Inter', sans-serif; /* explicitly re-declare just in case */
 }
 
 .main-content {
@@ -67,7 +69,7 @@ p {
 }
 
 .container-active {
-    font-size: 0.8rem;
+    font-size: 0.95rem;
     text-align: center;
     color: white;
     padding: 0 3rem;
@@ -334,6 +336,77 @@ input[type="number"]::placeholder {
   pointer-events: auto;
 }
 
+  /* === Frequently Asked Questions === */
+
+.faq-container {
+  width: 90%;
+  max-width: 700px;
+  margin: 4rem auto;
+  text-align: left;
+}
+
+.faq-container h2 {
+  font-size: 1.4rem;
+  color: #d4a055;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.faq-item {
+  margin-bottom: 1rem;
+  border: 1px solid #333;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #1a1a1a;
+}
+
+.faq-question {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  outline: none;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #d4d3d2;
+  cursor: pointer;
+}
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  background-color: #0d0d0d;
+  padding: 0 1rem;
+}
+
+.faq-answer p {
+  padding: 1rem 0;
+  color: #eee;
+  font-size: 0.9rem;
+}
+.faq-item.active .faq-answer {
+  max-height: 300px; /* Enough to show content */
+}
+.faq-question:hover {
+  background-color: #006f35; /* light grayish-black for dark UI */
+  
+}
+.faq-item.active .faq-question {
+  color: #d4a055; /* or any color you want, e.g., #00ff88 for mint green */
+}
+.faq-item.active .faq-question:hover {
+  color: #eee; 
+}
+.faq-answer p {
+  font-size: 0.95rem;
+  font-weight: 500; /* was normal (400) */
+  line-height: 1.6;
+  font-family: 'Inter', sans-serif; /* explicitly re-declare just in case */
+}
+
+
 
 
 
@@ -371,7 +444,7 @@ footer a:hover {
   }
 
   .container-active {
-    font-size: 1rem;
+    font-size: 1.5rem;
     padding: 0 6rem;
     margin-top: 4rem;
   }
