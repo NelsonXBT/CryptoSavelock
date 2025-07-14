@@ -1,3 +1,6 @@
+
+
+
 document.addEventListener("DOMContentLoaded", () => {
   console.log("✅ DOM ready");
 
@@ -84,27 +87,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const vaultBalanceEl = document.getElementById('vaultBalance');
 
   function showStatus(message, duration = 5000) {
-    let statusDiv = document.getElementById("statusMessage");
-    if (!statusDiv) {
-      statusDiv = document.createElement("div");
-      statusDiv.id = "statusMessage";
-      statusDiv.style.position = "fixed";
-      statusDiv.style.top = "50%";
-      statusDiv.style.left = "50%";
-      statusDiv.style.transform = "translate(-50%, -50%)";
-      statusDiv.style.backgroundColor = "#111";
-      statusDiv.style.color = "#fff";
-      statusDiv.style.padding = "14px 25px";
-      statusDiv.style.borderRadius = "10px";
-      statusDiv.style.boxShadow = "0 4px 20px rgba(0,0,0,0.4)";
-      statusDiv.style.zIndex = "9999";
-      statusDiv.style.fontSize = "16px";
-      document.body.appendChild(statusDiv);
-    }
+    const statusDiv = document.getElementById("statusMessage");
+    if (!statusDiv) return;
     statusDiv.textContent = message;
-    statusDiv.style.display = "block";
+    statusDiv.classList.add("show");
     setTimeout(() => {
-      statusDiv.style.display = "none";
+      statusDiv.classList.remove("show");
     }, duration);
   }
 
