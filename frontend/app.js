@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   const connectBtn = document.getElementById("connectBtn");
-  const homepage = document.getElementById("homepage");
+  const homepageWrapper = document.getElementById("homepageWrapper");
   const dashboard = document.getElementById("dashboard");
   const depositForm = document.getElementById("depositForm");
   const depositAmount = document.getElementById("depositAmount");
@@ -154,7 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
       userAddress = await signer.getAddress();
       contract = new ethers.Contract(contractAddress, abi, signer);
 
-      homepage.style.display = "none";
+      homepageWrapper.style.display = "none";
       dashboard.style.display = "block";
 
       const rawUnlockTime = await contract.getUnlockTime();

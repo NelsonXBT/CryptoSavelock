@@ -443,6 +443,8 @@ input[type="number"]::placeholder {
   font-family: 'Inter', sans-serif;
 }
 
+
+
 /* Slightly larger spacing on desktop */
 @media screen and (min-width: 768px) {
   .how-it-works-box {
