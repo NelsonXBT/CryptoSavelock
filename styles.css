@@ -333,7 +333,7 @@ input[type="number"]::placeholder {
   pointer-events: auto;
 }
 
-#txStatus {
+/* #txStatus {
   position: fixed;
   bottom: 20px;
   left: 50%;
@@ -345,7 +345,7 @@ input[type="number"]::placeholder {
   font-size: 14px;
   display: none;
   z-index: 1000;
-}
+} */
 
 
 
