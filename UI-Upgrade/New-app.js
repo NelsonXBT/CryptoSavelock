@@ -18,6 +18,72 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", () => {
   console.log("✅ DOM ready");
 
+
+ window.addEventListener("DOMContentLoaded", () => {
+    const targetForm = document.getElementById("targetForm");
+    const targetSection = document.getElementById("targetFormSection");
+    const progressTitle = document.getElementById("progressTitle");
+    const progressBar = document.getElementById("progressBar");
+    const progressStatus = document.getElementById("progressStatus");
+    const goalSummary = document.getElementById("goalSummary");
+
+    // ✅ Check if user has already saved goal
+    async function handleTargetFormDisplay() {
+      if (!window.ethereum) return;
+      const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+      const address = accounts[0];
+
+      const savedGoal = localStorage.getItem(`${address}_goalData`);
+
+      if (savedGoal) {
+        homepageWrapper.style.display = "none";
+        targetSection.style.display = "none";
+        dashboard.style.display = "block";
+        showGoalProgress(JSON.parse(savedGoal));
+      } else {
+        homepageWrapper.style.display = "none";
+        targetSection.style.display = "block";
+      }
+    }
+
+    connectBtn.addEventListener("click", handleTargetFormDisplay);
+
+    // ✅ Save target and show dashboard
+    targetForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const purpose = document.getElementById("savingPurpose").value;
+      const targetAmount = parseFloat(document.getElementById("targetAmount").value);
+      const frequency = document.getElementById("frequency").value;
+
+      if (!purpose || !targetAmount || isNaN(targetAmount) || !frequency) {
+        alert("Please fill all fields");
+        return;
+      }
+
+      localStorage.setItem(`${userAddress}_goalData`, JSON.stringify({ purpose, targetAmount, frequency }));
+      targetSection.style.display = "none";
+      dashboard.style.display = "block";
+      showGoalProgress({ purpose, targetAmount, frequency });
+    });
+
+    // ✅ Update progress bar
+    async function showGoalProgress(goalData) {
+      try {
+        const total = await contract.getTotalDeposited(userAddress);
+        const ethAmount = parseFloat(ethers.utils.formatEther(total));
+        const percent = Math.min((ethAmount / goalData.targetAmount) * 100, 100);
+
+        progressTitle.textContent = `${goalData.purpose} Savings Progress`;
+        progressBar.style.width = `${percent}%`;
+        progressStatus.textContent = `${ethAmount.toFixed(4)} ETH saved out of ${goalData.targetAmount} ETH (${percent.toFixed(1)}%)`; 
+        goalSummary.style.display = "block";
+      } catch (err) {
+        console.warn("⚠️ Failed to load goal progress", err);
+      }
+    }
+  });
+
+
   let provider, signer, contract, userAddress, unlockTimestamp;
   const contractAddress = "0xF020f362CDe86004d94C832596415E082A77e203";
   const rpcUrl = "https://sepolia-rollup.arbitrum.io/rpc";

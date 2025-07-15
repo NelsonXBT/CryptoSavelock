@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Savelock: Crypto Savings App</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="New-style.css" />
   <link rel="icon" href="./img/savelock-favicon.png">
   <script defer src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
-  <script defer src="app.js"></script>
+  <script defer src="New-app.js"></script>
 
 </head>
 
@@ -179,6 +179,49 @@
       </table>
     </div>
   </div>
+
+
+
+  <!-- ✅ Target Form Section (new) -->
+<div id="targetFormSection" class="container-active" style="display: none;">
+  <h1>Start Your Savings Plan</h1>
+  <form id="targetForm" class="target-form">
+    <label for="savingPurpose">What are you saving for?</label>
+    <select id="savingPurpose" required>
+      <option value="">Select a purpose</option>
+      <option value="Trading Capital">Trading Capital</option>
+      <option value="Investment Capital">Investment Capital</option>
+      <option value="Christmas Fund">Christmas Fund</option>
+      <option value="School Fees">School Fees</option>
+      <option value="Emergency Fund">Emergency Fund</option>
+    </select>
+
+    <label for="targetAmount">What is your target amount (in ETH)?</label>
+    <input type="number" id="targetAmount" placeholder="e.g. 1.5" required step="0.01">
+
+    <label for="frequency">How would you prefer to save?</label>
+    <select id="frequency" required>
+      <option value="daily">Daily</option>
+      <option value="weekly">Weekly</option>
+      <option value="monthly">Monthly</option>
+      <option value="manual">Manual</option>
+    </select>
+
+    <button type="submit" id="startSavingBtn">Start Saving</button>
+  </form>
+</div>
+
+<!-- ✅ Progress Bar & Summary in Dashboard (insert this inside #dashboard under saveLockStats or above deposit container) -->
+<div id="goalSummary" style="display: none; margin-bottom: 2rem;">
+  <h3 id="progressTitle">Your Savings Progress</h3>
+  <div style="width: 90%; max-width: 400px; background: #333; border-radius: 10px; margin: 0 auto; overflow: hidden;">
+    <div id="progressBar" style="height: 18px; background: #007A33; width: 0%;"></div>
+  </div>
+  <p id="progressStatus" style="margin-top: 0.5rem; color: #ccc;"></p>
+</div>
+
+
+
 
 
   <footer>

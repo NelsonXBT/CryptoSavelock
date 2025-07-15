@@ -481,6 +481,49 @@ footer a:hover {
 }
 
 
+
+
+
+
+
+
+<!-- ✅ CSS additions (add below your current styles) -->
+
+  .target-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 400px;
+    margin: 2rem auto;
+    text-align: left;
+  }
+  .target-form label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #d4a055;
+  }
+  .target-form input,
+  .target-form select {
+    padding: 14px;
+    border-radius: 10px;
+    background: #0d0d0d;
+    border: 1px solid #999;
+    color: white;
+    font-size: 1rem;
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* Desktop View */
 @media screen and (min-width: 768px) {
   body {
