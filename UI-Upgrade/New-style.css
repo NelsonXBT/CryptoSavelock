@@ -1,0 +1,589 @@
+html {
+     background-color: black;
+     height: 100%;
+     margin: 0;
+     padding: 0;   
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    margin: 0 auto;
+    height: 100%;
+    width: 100vw;
+    text-align: center;
+    overflow-x: hidden;
+    max-width: 1500px;
+    color: white;
+}
+h1 {
+  font-weight: 700;
+}
+
+p {
+  font-weight: 500; /* was normal (400) */
+  line-height: 1.6;
+  font-family: 'Inter', sans-serif; /* explicitly re-declare just in case */
+}
+
+.main-content {
+    flex: 1; /* ensures it takes up all remaining space */
+}
+
+/* 
+ HEADER SECTION 
+ */
+
+/* Navbar base styling */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2rem 3rem;
+  /* background-color: #eff7f4; */
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  color: white;
+}
+.logo a {
+  color: white;
+  text-decoration: none;
+}
+.logo img {
+  height: 2rem;
+}
+
+.logo h1 {
+  font-size: 1.5rem;
+  margin: 0;
+  color: rgb(255, 253, 253);
+}
+
+.container-active {
+    font-size: 0.95rem;
+    text-align: center;
+    color: white;
+    padding: 0 3rem;
+    margin-top: 5rem;
+}
+.container-active h1 {
+    font-size: 1.4rem;
+    margin-bottom: 2rem;
+}
+
+#connectBtn {
+    background-color: #007A33;
+    font-size: 1.2rem;
+    color: white;
+    padding: 0.5rem;
+    border:0.3rem solid #007A33;
+    border-radius: 0.3rem;
+    margin-top: 1rem;
+    
+    /* margin-bottom: 1rem; */
+}
+#connectBtn:hover {
+    background-color: #028d3c;
+    border:0.3rem solid #028d3c;
+    border-radius: 0.3rem;
+}
+
+/* ==== Dashboard Design ===== */
+
+.container {
+  /* display: none; */
+  min-height: 100vh;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  /* padding: 20px; */
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.active {
+  display: flex;
+}
+
+h1, h2, h3, p {
+  margin-bottom: 16px;
+}
+
+button {
+  background-color: #007f3e; /* Deep Green */
+  color: #fff;
+  padding: 14px 28px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  width: 85%;
+  max-width: 300px;
+}
+
+button:hover {
+  background-color: #006f35;
+}
+
+#depositForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  margin: 20px 0;
+  width: 100%;
+  max-width: 380px;
+}
+
+#depositForm label {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+input[type="number"] {
+  padding: 14px;
+  border-radius: 12px;
+  border: 2px solid #d4a055;
+  width: 70%;
+  background-color: #0d0d0d;
+  color: #fff;
+  font-size: 1rem;
+}
+
+input[type="number"]::placeholder {
+  color: #999;
+  font-style: italic;
+}
+.saveLockStats {
+  background-color: #1a1a1a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.7rem;
+  width: 100%;
+  max-width: 400px;
+  margin: 2rem auto;
+  border: 0.25rem solid #1a1a1a;
+  border-radius: 16px;
+  box-sizing: border-box;
+}
+
+.saveLockStats span {
+  flex: 1;
+  text-align: center;
+}
+
+.startDateInfo {
+  text-align: left;
+  color: #d4a055;
+
+}
+#startDate {
+  color: white;
+  font-size: 0.6rem;
+}
+
+.totalUsersInfo {
+  text-align: center;
+  color: #d4a055;
+}
+#totalUsers {
+  color: white;
+  font-size: 0.6rem;
+}
+
+.VaulbalanceInfo {
+  text-align: right;
+  padding-right: 0.5rem;
+  color: #d4a055;
+}
+#vaultBalance {
+  color: white;
+  font-size: 0.6rem;
+}
+
+#countdown {
+  margin: 16px 0 70px 0;
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: #d4a055;
+}
+#countdown p {
+  font-size: 0.7rem;
+  padding: 0 5rem 0 5rem;
+  color: #999;
+}
+#timer {
+  color: white;
+
+}
+
+
+#historyTable {
+  margin: 2rem auto;
+  margin-bottom: 5rem;
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 400px;
+  background-color: #1a1a1a;
+  border: 0.25rem solid #1a1a1a;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+#historyTable th, #historyTable td {
+  padding: 14px;
+  text-align: center;
+  color: #e5e5e5;
+}
+
+#historyTable tr:not(:last-child) {
+  border-bottom: 1px solid #333;
+}
+
+#globalClaimWrapper {
+  margin-top: 20px;
+  display: none;
+}
+
+/* Deposit + Balance Container (default mobile) */
+.deposit-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+  width: 100%;
+}
+#depositTitle {
+    font-size: 1.2rem;
+}
+
+/* Total Balance Box */
+.total-balance-box {
+  background-color: #d4a055; /* Gold */
+  color: #000;
+  border-radius: 16px;
+  padding: 30px 40px;
+  width: 100%;
+  max-width: 220px;
+  min-height: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 1.8rem;
+  border: 2px solid #d4a055; /* No white outline */
+  text-align: center;
+}
+
+.total-balance-box .label {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #000;
+}
+
+.total-balance-box #totalDeposited {
+  font-size: 2.2rem;
+  font-weight: bold;
+  color: #000;
+  background: none;
+  padding: 0;
+  margin: 0;
+}
+#claimNote {
+    font-size: 0.85rem;
+}
+
+
+#statusMessage {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 250px;
+  max-width: 90%;
+  background: #eaeaea;;
+  color:  rgba(22, 22, 22, 0.95);
+  padding: 18px 24px;
+  border: 2px solid #eaeaea;;
+  border-radius: 14px;
+  font-size: 18px;
+  font-weight: 500; /* was normal (400) */
+  line-height: 1.6;
+  font-family: 'Inter', sans-serif;
+  text-align: center;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  z-index: 10000;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+  
+}
+
+#statusMessage.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  pointer-events: auto;
+}
+
+  /* === Frequently Asked Questions === */
+
+.faq-container {
+  width: 90%;
+  max-width: 700px;
+  margin: 4rem auto;
+  text-align: left;
+}
+
+.faq-container h2 {
+  font-size: 1.4rem;
+  color: #d4a055;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.faq-item {
+  margin-bottom: 1rem;
+  border: 1px solid #333;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #1a1a1a;
+}
+
+.faq-question {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  outline: none;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #d4d3d2;
+  cursor: pointer;
+}
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  background-color: #0d0d0d;
+  padding: 0 1rem;
+}
+
+.faq-answer p {
+  padding: 1rem 0;
+  color: #eee;
+  font-size: 0.9rem;
+}
+.faq-item.active .faq-answer {
+  max-height: 300px; /* Enough to show content */
+}
+.faq-question:hover {
+  background-color: #006f35; /* light grayish-black for dark UI */
+  
+}
+.faq-item.active .faq-question {
+  color: #d4a055; /* or any color you want, e.g., #00ff88 for mint green */
+}
+.faq-item.active .faq-question:hover {
+  color: #eee; 
+}
+.faq-answer p {
+  font-size: 0.95rem;
+  font-weight: 500; /* was normal (400) */
+  line-height: 1.6;
+  font-family: 'Inter', sans-serif; /* explicitly re-declare just in case */
+}
+
+/* How It Works: Boxed Steps */
+.how-it-works-box {
+  background-color: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 16px;
+  padding: 1.5rem 1rem;
+  margin: 3rem auto;
+  width: 80%;
+  max-width: 700px;
+  text-align: left;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.how-it-works-box h2 {
+  color: #d4a055;
+  font-size: 1.3rem;
+  text-align: center;
+  margin-bottom: 1.2rem;
+}
+
+.how-it-works-box ol {
+  padding-left: 1.2rem;
+  margin: 0;
+}
+
+.how-it-works-box li {
+  font-size: 0.95rem;
+  color: #eee;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  font-family: 'Inter', sans-serif;
+}
+
+
+
+/* Slightly larger spacing on desktop */
+@media screen and (min-width: 768px) {
+  .how-it-works-box {
+    padding: 2rem 2.5rem;
+  }
+
+  .how-it-works-box h2 {
+    font-size: 1.5rem;
+  }
+
+  .how-it-works-box li {
+    font-size: 1.05rem;
+  }
+}
+
+
+
+
+
+
+
+
+footer {
+  color: white;
+  font-size: 0.8rem;
+  padding: 1rem;
+
+}
+footer a {
+  color: #007A33;
+}
+footer a:hover {
+  color: #028d3c;
+}
+
+
+/* Desktop View */
+@media screen and (min-width: 768px) {
+  body {
+    font-size: 14px; /* increase base font size */
+  }
+
+  .navbar {
+    padding: 3rem 6rem;
+  }
+
+  .logo img {
+    height: 3rem;
+  }
+
+  .logo h1 {
+    font-size: 2rem;
+  }
+
+  .container-active {
+    font-size: 1.3rem;
+    padding: 0 6rem;
+    margin-top: 4rem;
+  }
+
+  .container-active h1 {
+    font-size: 2rem;
+    margin-bottom: 3rem;
+  }
+ 
+  #connectBtn {
+    font-size: 1.4rem;
+    padding: 0.8rem 1.5rem;
+    border-width: 0.4rem;
+    border-radius: 0.4rem;
+  }
+input[type="number"] {
+  padding: 20px;
+  font-size: 1rem;
+}
+  
+  footer {
+    font-size: 1rem;
+    padding: 2rem;
+  }
+
+   .deposit-container {
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 80px;
+    text-align: left;
+  }
+
+  .deposit-container > .deposit-section {
+    order: 1;
+  }
+
+  .deposit-container > .total-balance-box {
+    order: 2;
+    align-self: flex-start;
+  }
+
+  #depositForm {
+    align-items: flex-start;
+    margin: 0;
+  }
+
+  .total-balance-box {
+    margin-top: 0;
+    padding: 30px 40px;
+    width: 100%;
+    max-width: 250px;
+    min-height: 100px;
+  }
+
+.saveLockStats {
+  font-size: 1rem;
+  width: 100%;
+  max-width: 650px;
+  margin: 2rem auto;
+}
+
+#historyTable {
+        margin: 2rem auto;
+        max-width: 600px;
+}
+#countdown {
+    margin-top: 100px;
+    font-size: 2.5rem;
+}
+#countdown p {
+  font-size: 1rem;
+}
+
+
+}
+
+@media screen and (min-width: 1080px) {
+   .container-active p {
+  padding: 0 15rem 0 15rem;
+}
+
+
+}
+
+
